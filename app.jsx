@@ -3,7 +3,7 @@ const { useState: useS, useEffect: useE, useCallback: useCb } = React;
 
 function App() {
   const [theme, setTheme] = useS(() => localStorage.getItem("ae_theme") || "light");
-  const [authed, setAuthed] = useS(() => localStorage.getItem("ae_authed") === "1");
+  const [authed, setAuthed] = useS(() => true);
   const [onboarded, setOnboarded] = useS(() => localStorage.getItem("ae_onboarded") !== "0");
   const [autostart, setAutostart] = useS(false);
   const [autostartPath, setAutostartPath] = useS("traces");
@@ -32,7 +32,6 @@ function App() {
 
   const onAuth = (isNew) => { setAuthed(true); if (isNew) { setOnboarded(false); } };
 
-  if (!authed) return <><AuthView onAuth={onAuth} theme={theme} toggleTheme={toggleTheme} />{toastNode}</>;
   if (!onboarded) return <><OnboardingFlow onComplete={(path) => { setOnboarded(true); setAutostart(true); setAutostartPath(path || "traces"); setCanvas(null); }} theme={theme} toggleTheme={toggleTheme} />{toastNode}</>;
 
   // view renderer for canvas

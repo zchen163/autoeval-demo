@@ -143,45 +143,45 @@
   // ---------------- scripts (simplified: onboarding → daily monitor) ----------------
   function scene1() {
     return [
-      { chapter: "Onboarding", cap: "全新客户:从一个空账号开始。", run: () => sleep(2200) },
-      { chapter: "Onboarding", cap: "创建组织,首个用户成为 Admin。", run: () => actClick(T("Create org", { tag: "button" })) },
-      { chapter: "Onboarding", cap: "继续。", run: () => actClick(T("Create org & continue", { contains: true, tag: "button" })) },
-      { chapter: "Describe", cap: "用大白话描述这个 chat agent 做什么。", run: () => actSpot(() => document.querySelector("textarea"), 2800) },
-      { chapter: "Describe", cap: "下一步。", run: () => actClick(T("Continue", { contains: true, tag: "button" })) },
-      { chapter: "Bring labeled data", cap: "第三种方式:我自己手动标过一批 chat 样本和分数。", run: () => actClick(T("I have a labeled set", { contains: true, tag: "button" }), { after: 1100 }) },
-      { chapter: "Bring labeled data", cap: "上传我标好的 labeled.csv(input + output + 分数)。", run: () => actClick(T("Drop", { contains: true, tag: "button" })) },
-      { chapter: "Bring labeled data", cap: "120 条人工标注样本已读入,列结构自动识别。", run: () => actSpot(T("120 labeled examples", { contains: true }), 2600) },
-      { chapter: "Bring labeled data", cap: "继续。", run: () => actClick(T("Continue", { contains: true, tag: "button" })) },
-      { chapter: "First eval", cap: "agent 接下来会:推导 rubric → 生成 golden → 每日跑 → 监控。", run: () => sleep(2800) },
-      { chapter: "First eval", cap: "开始构建。", run: () => actClick(T("Build my first eval", { contains: true, tag: "button" })) },
+      { chapter: "Onboarding", cap: "Brand-new customer: starting from an empty account.", run: () => sleep(2200) },
+      { chapter: "Onboarding", cap: "Create the org — the first user becomes Admin.", run: () => actClick(T("Create org", { tag: "button" })) },
+      { chapter: "Onboarding", cap: "Continue.", run: () => actClick(T("Create org & continue", { contains: true, tag: "button" })) },
+      { chapter: "Describe", cap: "Describe in plain English what this chat agent does.", run: () => actSpot(() => document.querySelector("textarea"), 2800) },
+      { chapter: "Describe", cap: "Next.", run: () => actClick(T("Continue", { contains: true, tag: "button" })) },
+      { chapter: "Bring labeled data", cap: "Third option: I have a batch of chat samples that I've manually labeled with scores.", run: () => actClick(T("I have a labeled set", { contains: true, tag: "button" }), { after: 1100 }) },
+      { chapter: "Bring labeled data", cap: "Upload my labeled.csv (input + output + scores).", run: () => actClick(T("Drop", { contains: true, tag: "button" })) },
+      { chapter: "Bring labeled data", cap: "120 human-labeled samples loaded; columns auto-detected.", run: () => actSpot(T("120 labeled examples", { contains: true }), 2600) },
+      { chapter: "Bring labeled data", cap: "Continue.", run: () => actClick(T("Continue", { contains: true, tag: "button" })) },
+      { chapter: "First eval", cap: "Next the agent will: infer rubric → generate golden → run daily → monitor.", run: () => sleep(2800) },
+      { chapter: "First eval", cap: "Start building.", run: () => actClick(T("Build my first eval", { contains: true, tag: "button" })) },
     ];
   }
   function scene2() {
     return [
-      { chapter: "Generate rubric", cap: "Copilot 从我的标注里反推出评分标准——什么分开了高分与低分。", run: async () => {
+      { chapter: "Generate rubric", cap: "Copilot infers the rubric from my labels — what separates high from low scores.", run: async () => {
           const running = await poll(() => findText("inferred from your labels", { contains: true }) || findText("Approve", { tag: "button" }), 6000);
           await sleep(600);
         } },
-      { chapter: "Generate rubric", cap: "查看推导出的 rubric。", run: () => actClick(T("inferred from your labels", { contains: true }), { optional: true }) },
-      { chapter: "Generate rubric", cap: "批准 rubric。", run: () => actClick(T("Approve", { tag: "button" })) },
-      { chapter: "Generate golden", cap: "下一步:把这 120 条标注变成 golden 数据集——全是人工 ground truth。", run: () => actClick(T("Golden dataset — from your labels", { contains: true }), { optional: true }) },
-      { chapter: "Generate golden", cap: "批准 golden 数据集。", run: () => actClick(T("Approve", { tag: "button" })) },
-      { chapter: "Daily run", cap: "基于这套固定 rubric,自动跑「今天」的评估…", run: () => poll(T("Today's run", { contains: true }), 12000).then(() => sleep(800)) },
-      { chapter: "Daily run", cap: "今日结果按每个 rubric 维度打分,并和我的标注对齐(0.89)。", run: () => actSpot(T("Today's run", { contains: true }), 3600) },
+      { chapter: "Generate rubric", cap: "View the inferred rubric.", run: () => actClick(T("inferred from your labels", { contains: true }), { optional: true }) },
+      { chapter: "Generate rubric", cap: "Approve the rubric.", run: () => actClick(T("Approve", { tag: "button" })) },
+      { chapter: "Generate golden", cap: "Next: turn these 120 labels into a golden dataset — all human ground truth.", run: () => actClick(T("Golden dataset — from your labels", { contains: true }), { optional: true }) },
+      { chapter: "Generate golden", cap: "Approve the golden dataset.", run: () => actClick(T("Approve", { tag: "button" })) },
+      { chapter: "Daily run", cap: "Using this fixed rubric, run today's evaluation automatically…", run: () => poll(T("Today's run", { contains: true }), 12000).then(() => sleep(800)) },
+      { chapter: "Daily run", cap: "Today's results are scored per rubric dimension and aligned with my labels (0.89).", run: () => actSpot(T("Today's run", { contains: true }), 3600) },
     ];
   }
   function scene3() {
     return [
-      { chapter: "Daily monitor", cap: "最后一页:基于这套固定 rubric,持续对比每天的运行结果。", run: async () => {
+      { chapter: "Daily monitor", cap: "Last page: with this fixed rubric, continuously compare each day's results.", run: async () => {
           const open = await poll(T("Rubric performance over time", { contains: true }), 2500);
           if (!open) await askComposer("show me performance over time");
           await sleep(600);
         } },
-      { chapter: "Daily monitor", cap: "每个 rubric 维度的时间曲线——离线批量 + 在线采样,部署点标在轴上。", run: () => actSpot(T("Rubric performance over time", { contains: true }), 3800) },
-      { chapter: "Daily monitor", cap: "可叠加任意维度查看。", run: () => actClick(T("Faithfulness", { tag: "button" }), { optional: true, after: 1100 }) },
-      { chapter: "Daily monitor", cap: "跌破阈值会自动抓成回归并定位到具体部署。", run: () => actSpot(T("Detected regressions", { contains: true }), 3400) },
-      { chapter: "Daily monitor", cap: "设个告警:总分跌破阈值就通知。", run: () => actClick(T("Set up an alert", { contains: true, tag: "button" }), { optional: true }) },
-      { chapter: "Done", cap: "完整闭环:我的标注 → rubric + golden → 每日跑 → 持续对比同一把尺。", run: () => sleep(3000) },
+      { chapter: "Daily monitor", cap: "Time series per rubric dimension — offline batch + online sampling, with deployment points marked on the axis.", run: () => actSpot(T("Rubric performance over time", { contains: true }), 3800) },
+      { chapter: "Daily monitor", cap: "Overlay any dimension to compare.", run: () => actClick(T("Faithfulness", { tag: "button" }), { optional: true, after: 1100 }) },
+      { chapter: "Daily monitor", cap: "Threshold breaches are auto-captured as regressions and localized to the specific deployment.", run: () => actSpot(T("Detected regressions", { contains: true }), 3400) },
+      { chapter: "Daily monitor", cap: "Set an alert — notify when overall score drops below threshold.", run: () => actClick(T("Set up an alert", { contains: true, tag: "button" }), { optional: true }) },
+      { chapter: "Done", cap: "Full loop: my labels → rubric + golden → daily runs → continuous comparison against the same ruler.", run: () => sleep(3000) },
     ];
   }
   function buildScript(scene) {
@@ -196,65 +196,62 @@
   // ---- returning customer: log in → review prod logs → rubric suggestions → flag for review ----
   function sceneReview() {
     return [
-      { chapter: "Daily review", cap: "老客户登录,开始每日例行检查。", run: () => sleep(2200) },
-      { chapter: "Dashboard", cap: "先问一句:这周整体怎么样?", run: () => askComposer("show me this week's dashboard") },
-      { chapter: "Dashboard", cap: "最近的 dashboard:质量分趋势、leaderboard、待办。", run: () => actSpot(T("Quality score trend", { contains: true }), 3600) },
-      { chapter: "Prod logs", cap: "再看过去一周的生产日志。", run: () => askComposer("review last week's prod logs") },
-      { chapter: "Prod logs", cap: "让 Triage 分析整体日志。", run: () => actClick(T("Analyze all logs", { contains: true, tag: "button" }), { optional: true, after: 1100 }) },
-      { chapter: "Prod logs", cap: "整体日志分析:主题分布 + 分数分布,大部分健康。", run: () => actSpot(T("Overall log analysis", { contains: true }), 3400) },
-      { chapter: "Rubric suggestions", cap: "根据这周日志,哪些评分标准需要改或新增?", run: () => askComposer("suggest rubric updates from these logs") },
-      { chapter: "Rubric suggestions", cap: "agent 给出 3 条建议:新增退款合规、新增延迟检查、收紧 groundedness。", run: () => actSpot(T("Suggested updates from this week's logs", { contains: true }), 3800) },
-      { chapter: "Rubric suggestions", cap: "采纳「新增退款合规」这条。", run: () => actClick(T("Add", { tag: "button" }), { optional: true }) },
-      { chapter: "Flag for review", cap: "还有哪些日志需要人工复核?", run: () => askComposer("show me the logs flagged for a human") },
-      { chapter: "Flag for review", cap: "Triage 已按复核价值排好序——判官-人工分歧、政策敏感最优先。", run: () => actSpot(T("Worth a human's review", { contains: true }), 3600) },
-      { chapter: "Flag for review", cap: "一键送去人工复核队列。", run: () => actClick(T("Review", { tag: "button" }), { optional: true }) },
-      { chapter: "Done", cap: "每日例行:看趋势 → 审日志 → 调 rubric → 派人复核。", run: () => sleep(2800) },
+      { chapter: "Daily review", cap: "Returning customer signs in to start the daily check-in.", run: () => sleep(2200) },
+      { chapter: "Dashboard", cap: "Ask first — how's this week overall?", run: () => askComposer("show me this week's dashboard") },
+      { chapter: "Dashboard", cap: "Recent dashboard — quality score trend, leaderboard, to-dos.", run: () => actSpot(T("Quality score trend", { contains: true }), 3600) },
+      { chapter: "Prod logs", cap: "Now review last week's production logs.", run: () => askComposer("review last week's prod logs") },
+      { chapter: "Prod logs", cap: "Have Triage analyze the logs as a whole.", run: () => actClick(T("Analyze all logs", { contains: true, tag: "button" }), { optional: true, after: 1100 }) },
+      { chapter: "Prod logs", cap: "Overall log analysis — topic distribution + score distribution; most are healthy.", run: () => actSpot(T("Overall log analysis", { contains: true }), 3400) },
+      { chapter: "Rubric suggestions", cap: "Based on this week's logs, which rubric criteria need to change or be added?", run: () => askComposer("suggest rubric updates from these logs") },
+      { chapter: "Rubric suggestions", cap: "The agent suggests 3 updates: add refund-compliance, add latency check, tighten groundedness.", run: () => actSpot(T("Suggested updates from this week's logs", { contains: true }), 3800) },
+      { chapter: "Rubric suggestions", cap: "Adopt the “add refund-compliance” suggestion.", run: () => actClick(T("Add", { tag: "button" }), { optional: true }) },
+      { chapter: "Flag for review", cap: "Which other logs need a human review?", run: () => askComposer("show me the logs flagged for a human") },
+      { chapter: "Flag for review", cap: "Triage has ranked them by review value — judge-vs-human disagreements and policy-sensitive cases first.", run: () => actSpot(T("Worth a human's review", { contains: true }), 3600) },
+      { chapter: "Flag for review", cap: "Send to the human-review queue with one click.", run: () => actClick(T("Review", { tag: "button" }), { optional: true }) },
+      { chapter: "Done", cap: "Daily routine: check trends → review logs → tune rubric → assign humans.", run: () => sleep(2800) },
     ];
   }
 
   // ---- trace-upload-only variant (onboard via traces → build eval → report) ----
   function sceneT1() {
     return [
-      { chapter: "Onboarding", cap: "全新客户:从一个空账号开始。", run: () => sleep(2200) },
-      { chapter: "Onboarding", cap: "创建组织,首个用户成为 Admin。", run: () => actClick(T("Create org", { tag: "button" })) },
-      { chapter: "Onboarding", cap: "继续。", run: () => actClick(T("Create org & continue", { contains: true, tag: "button" })) },
-      { chapter: "Describe", cap: "用大白话描述这个 agent 做什么。", run: () => actSpot(() => document.querySelector("textarea"), 2800) },
-      { chapter: "Describe", cap: "下一步。", run: () => actClick(T("Continue", { contains: true, tag: "button" })) },
-      { chapter: "Upload traces", cap: "我有历史 trace——直接导入一包。", run: () => actClick(T("I have sample traces", { contains: true, tag: "button" }), { after: 1100 }) },
-      { chapter: "Upload traces", cap: "上传 traces.zip。", run: () => actClick(T("Drop", { contains: true, tag: "button" })) },
-      { chapter: "Upload traces", cap: "512 条 trace 已解析,schema 自动识别。", run: () => actSpot(T("512 traces parsed", { contains: true }), 2600) },
-      { chapter: "Upload traces", cap: "继续。", run: () => actClick(T("Continue", { contains: true, tag: "button" })) },
-      { chapter: "First eval", cap: "agent 接下来会:分析 traces → 生成 rubric set → 创建数据集 → baseline → 报告。", run: () => sleep(2800) },
-      { chapter: "First eval", cap: "开始构建。", run: () => actClick(T("Build my first eval", { contains: true, tag: "button" })) },
+      { chapter: "Describe", cap: "Describe in plain English what this agent does.", run: () => actSpot(() => document.querySelector("textarea"), 2800) },
+      { chapter: "Describe", cap: "Next.", run: () => actClick(T("Continue", { contains: true, tag: "button" })) },
+      { chapter: "Upload traces", cap: "I have historical traces — import a batch directly.", run: () => actClick(T("I have sample traces", { contains: true, tag: "button" }), { after: 1100 }) },
+      { chapter: "Upload traces", cap: "Upload traces.zip.", run: () => actClick(T("Drop", { contains: true, tag: "button" })) },
+      { chapter: "Upload traces", cap: "512 traces parsed; schema auto-detected.", run: () => actSpot(T("512 traces parsed", { contains: true }), 2600) },
+      { chapter: "Upload traces", cap: "Continue.", run: () => actClick(T("Continue", { contains: true, tag: "button" })) },
+      { chapter: "First eval", cap: "Next the agent will: analyze traces → generate rubric set → create dataset → baseline → report.", run: () => sleep(2800) },
+      { chapter: "First eval", cap: "Start building.", run: () => actClick(T("Build my first eval", { contains: true, tag: "button" })) },
     ];
   }
   function sceneT2() {
     return [
-      { chapter: "Build eval", cap: "Copilot 自动接管,逐步产出提案,每步等我审批。", run: () => poll(() => findText("Looks right", { tag: "button" }) || findText("Analyzed all 512 logs", { contains: true }), 6000).then(() => sleep(500)) },
-      { chapter: "Analyze logs", cap: "① 先分析整体日志——主题分布、分数分布、延迟,不只看失败。", run: () => actClick(T("Analyzed all 512 logs", { contains: true }), { optional: true }) },
-      { chapter: "Analyze logs", cap: "确认分析。", run: () => actClick(T("Looks right", { tag: "button" })) },
-      { chapter: "Rubric", cap: "② 从整体日志反推出评分标准——覆盖度、有用性、语气。", run: () => actClick(() => findText("Rubric — from your logs", { contains: true }), { optional: true }) },
-      { chapter: "Rubric", cap: "批准 rubric。", run: () => actClick(T("Approve", { tag: "button" })) },
-      { chapter: "Dataset", cap: "③ 基于这套 rubric 生成 golden 数据集。", run: () => actClick(() => findText("Dataset — Support QA v1", { contains: true }), { optional: true }) },
-      { chapter: "Dataset", cap: "批准数据集。", run: () => actClick(T("Approve", { tag: "button" })) },
-      { chapter: "Baseline", cap: "④ 自动跑 baseline,正在打分…", run: () => poll(T("Top gaps, ranked by impact", { contains: true }), 22000) },
+      { chapter: "Build eval", cap: "Copilot takes over, producing proposals step by step, awaiting my approval at each one.", run: () => poll(() => findText("Looks right", { tag: "button" }) || findText("Analyzed all 512 logs", { contains: true }), 6000).then(() => sleep(500)) },
+      { chapter: "Analyze logs", cap: "① Analyze logs as a whole first — topic distribution, score distribution, latency — not just failures.", run: () => actClick(T("Analyzed all 512 logs", { contains: true }), { optional: true }) },
+      { chapter: "Analyze logs", cap: "Confirm the analysis.", run: () => actClick(T("Looks right", { tag: "button" })) },
+      { chapter: "Rubric", cap: "② Infer rubric criteria from the logs — coverage, helpfulness, tone.", run: () => actClick(() => findText("Rubric — from your logs", { contains: true }), { optional: true }) },
+      { chapter: "Rubric", cap: "Approve the rubric.", run: () => actClick(T("Approve", { tag: "button" })) },
+      { chapter: "Dataset", cap: "③ Generate a golden dataset based on this rubric.", run: () => actClick(() => findText("Dataset — Support QA v1", { contains: true }), { optional: true }) },
+      { chapter: "Dataset", cap: "Approve the dataset.", run: () => actClick(T("Approve", { tag: "button" })) },
+      { chapter: "Baseline", cap: "④ Run baseline automatically — scoring in progress…", run: () => poll(T("Top gaps, ranked by impact", { contains: true }), 22000) },
     ];
   }
   function sceneT3() {
     return [
-      { chapter: "Report", cap: "报告自动生成。", run: async () => {
+      { chapter: "Report", cap: "Report generated automatically.", run: async () => {
           await poll(T("Top gaps, ranked by impact", { contains: true }), 14000);
           const main = document.querySelector("main");
           if (!main || !main.innerText.includes("Score by rubric dimension")) await actClick(T("results & recommendations", { contains: true }), { optional: true });
           await sleep(700);
         } },
-      { chapter: "Report", cap: "总分,以及判官一致性与通过率。", run: () => actSpot(T("Weighted overall", { contains: true }), 2800) },
-      { chapter: "Report", cap: "逐 rubric 维度看哪强哪弱。", run: () => actSpot(T("Score by rubric dimension", { contains: true }), 2600) },
-      { chapter: "Report", cap: "按影响排序的修复建议。", run: () => actSpot(T("Top gaps, ranked by impact", { contains: true }), 3000) },
-      { chapter: "Daily monitor", cap: "这不是一次性的——之后每天基于同一套 rubric 持续跑。", run: () => askComposer("show me performance over time") },
-      { chapter: "Daily monitor", cap: "总体趋势曲线:overall 分数随时间变化,部署点标在轴上。", run: () => actSpot(T("Rubric performance over time", { contains: true }), 3800) },
-      { chapter: "Daily monitor", cap: "跌破阈值会自动抓成回归并定位到具体部署。", run: () => actSpot(T("Detected regressions", { contains: true }), 3200) },
-      { chapter: "Done", cap: "从上传一包 trace,到每日持续监控——闭环完成。", run: () => sleep(2800) },
+      { chapter: "Report", cap: "Overall score, plus judge agreement and pass rate.", run: () => actSpot(T("Weighted overall", { contains: true }), 2800) },
+      { chapter: "Report", cap: "Per-rubric dimension breakdown — strong vs. weak.", run: () => actSpot(T("Score by rubric dimension", { contains: true }), 2600) },
+      { chapter: "Report", cap: "Fix suggestions ranked by impact.", run: () => actSpot(T("Top gaps, ranked by impact", { contains: true }), 3000) },
+      { chapter: "Daily monitor", cap: "This isn't one-off — from here on, the same rubric runs every day.", run: () => askComposer("show me performance over time") },
+      { chapter: "Daily monitor", cap: "Overall trend line — score over time, with deployment points marked on the axis.", run: () => actSpot(T("Rubric performance over time", { contains: true }), 3800) },
+      { chapter: "Daily monitor", cap: "Threshold breaches are auto-captured as regressions and localized to the specific deployment.", run: () => actSpot(T("Detected regressions", { contains: true }), 3200) },
+      { chapter: "Done", cap: "From uploading a batch of traces to continuous daily monitoring — the loop is complete.", run: () => sleep(2800) },
     ];
   }
 
@@ -269,14 +266,15 @@
       try { await steps[i].run(); } catch (e) { /* keep going */ }
     }
     state.done = true; clearSpot(); cursor.classList.remove("on");
-    capScene.textContent = "Demo complete"; capText.textContent = "点 ↻ 重播本场景,或选上方章节。";
+    capScene.textContent = "Demo complete"; capText.textContent = "Click ↻ to replay this scene, or pick a chapter above.";
   }
 
   // ---------------- boot / scene control ----------------
   function preconditions(scene) {
-    // scenes that begin at signup and walk the whole onboarding
-    if (scene === 0 || scene === 1 || scene === 7) { localStorage.setItem("ae_authed", "0"); localStorage.setItem("ae_onboarded", "0"); }
-    else { localStorage.setItem("ae_authed", "1"); localStorage.setItem("ae_onboarded", "1"); }
+    // login skipped — always authed. scenes 0/1/7 still begin from a fresh onboarding.
+    localStorage.setItem("ae_authed", "1");
+    if (scene === 0 || scene === 1 || scene === 7) { localStorage.setItem("ae_onboarded", "0"); }
+    else { localStorage.setItem("ae_onboarded", "1"); }
   }
   function startScene(scene) {
     preconditions(scene);
