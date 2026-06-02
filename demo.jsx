@@ -238,12 +238,12 @@
   }
   function startScene(scene) {
     preconditions(scene);
-    sessionStorage.setItem("ae_demo", JSON.stringify({ scene, run: true }));
+    location.hash = "play=" + scene;     // one-shot trigger; boot() clears it after read
     location.reload();
   }
   function exitDemo() {
-    sessionStorage.setItem("ae_demo", JSON.stringify({ run: false }));
     localStorage.setItem("ae_authed", "1"); localStorage.setItem("ae_onboarded", "1");
+    history.replaceState(null, "", location.pathname + location.search);
     location.reload();
   }
   function showLauncher() {
@@ -255,14 +255,22 @@
   }
 
   function boot() {
-    let demo = null; try { demo = JSON.parse(sessionStorage.getItem("ae_demo") || "null"); } catch {}
+    // one-shot #play=N trigger written by startScene — read, clear, run
+    const playMatch = location.hash.match(/play=(\d)/);
+    if (playMatch) {
+      history.replaceState(null, "", location.pathname + location.search);
+      const sceneNum = +playMatch[1];
+      buildHost();
+      host.querySelector(".aed-bar").style.display = "flex";
+      setTimeout(() => runScript(sceneNum), 900);
+      return;
+    }
+    // deep-link via #scene=N or window.DEMO_SCENE → kick off the scene
     const requested = (typeof window.DEMO_SCENE === "number") ? window.DEMO_SCENE
       : (location.hash.match(/scene=(\d)/) ? +location.hash.match(/scene=(\d)/)[1] : null);
-    // honor a chip click / in-progress run first, so chapter navigation works in exports
-    if (demo && demo.run) { buildHost(); host.querySelector(".aed-bar").style.display = "flex"; setTimeout(() => runScript(demo.scene || 0), 900); }
-    else if (demo && demo.run === false) { showLauncher(); }              // exited → idle launcher
-    else if (requested != null) { startScene(requested); }                // first load of an export file
-    else { showLauncher(); }                                               // dev / normal use
+    if (requested != null) { startScene(requested); return; }
+    // default: idle launcher, no autoplay
+    showLauncher();
   }
 
   window.AEDemo = { start: startScene, exit: exitDemo };

@@ -8,10 +8,7 @@ function App() {
   const [autostart, setAutostart] = useS(false);
   const [autostartPath, setAutostartPath] = useS("traces");
   // canvas: null = home; else {route, narrate, seq, ask, askSeq}
-  const [canvas, setCanvas] = useS(() => {
-    try { const d = JSON.parse(sessionStorage.getItem("ae_demo") || "null"); if (d && d.run && d.scene === 3) return { route: { view: "report" }, seq: 1, narrate: false }; } catch {}
-    return null;
-  });
+  const [canvas, setCanvas] = useS(null);
   const [palette, setPalette] = useS(false);
   const seqRef = React.useRef(0);
   const [push, toastNode] = useToast();
