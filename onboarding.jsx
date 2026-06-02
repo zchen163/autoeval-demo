@@ -48,10 +48,17 @@ function OnboardingFlow({ onComplete, theme, toggleTheme }) {
           <p className="muted" style={{ fontSize: 13.5, marginTop: 10, lineHeight: 1.6 }}>Tell me what your agent does and point me at your data. I'll draft a dataset and rubric, calibrate a judge, and run a baseline — you just review and approve.</p>
         </div>
         <div className="col gap-2" style={{ marginTop: 6 }}>
-          {labels.map((l, i) => <div key={l} className="row gap-2" style={{ fontSize: 12.5, color: i === step ? "var(--text)" : i < step ? "var(--text-2)" : "var(--text-faint)", fontWeight: i === step ? 600 : 500 }}>
-            <span style={{ width: 18, height: 18, borderRadius: 99, flexShrink: 0, display: "flex", alignItems: "center", justifyContent: "center", fontSize: 10, fontWeight: 700, background: i < step ? "var(--pos)" : i === step ? "var(--accent)" : "var(--surface-3)", color: i <= step ? "white" : "var(--text-3)" }} className="mono">{i < step ? window.Icons.check({ size: 11, sw: 3 }) : i + 1}</span>
-            {l}
-          </div>)}
+          {labels.map((l, i) => {
+            const clickable = i === 3; // only Optimization is freely jumpable; previous 3 steps untouched
+            const inner = <>
+              <span style={{ width: 18, height: 18, borderRadius: 99, flexShrink: 0, display: "flex", alignItems: "center", justifyContent: "center", fontSize: 10, fontWeight: 700, background: i < step ? "var(--pos)" : i === step ? "var(--accent)" : "var(--surface-3)", color: i <= step ? "white" : "var(--text-3)" }} className="mono">{i < step ? window.Icons.check({ size: 11, sw: 3 }) : i + 1}</span>
+              {l}
+            </>;
+            const sharedStyle = { fontSize: 12.5, color: i === step ? "var(--text)" : i < step ? "var(--text-2)" : "var(--text-faint)", fontWeight: i === step ? 600 : 500 };
+            return clickable
+              ? <button key={l} onClick={() => setStep(i)} className="row gap-2" style={{ ...sharedStyle, border: "none", background: "none", padding: 0, textAlign: "left", cursor: "pointer" }}>{inner}</button>
+              : <div key={l} className="row gap-2" style={sharedStyle}>{inner}</div>;
+          })}
         </div>
       </div>
       <div className="row gap-2"><span className="faint" style={{ fontSize: 12, flex: 1 }}>Northwind AI · Free plan</span>
@@ -212,8 +219,9 @@ function OnboardingFlow({ onComplete, theme, toggleTheme }) {
         {/* nav */}
         <div className="row gap-2" style={{ justifyContent: "space-between", marginTop: 4 }}>
           {step > 0 ? <Btn variant="ghost" icon="chevLeft" onClick={back}>Back</Btn> : <span />}
-          {step < 3 && <Btn variant="primary" iconR="arrowRight" disabled={!canContinue} onClick={next}>Continue</Btn>}
-          {step === 3 && <Btn variant="primary" size="lg" icon="bolt" onClick={() => onComplete(tracePath || "traces")}>Build my first eval</Btn>}
+          {step < 2 && <Btn variant="primary" iconR="arrowRight" disabled={!canContinue} onClick={next}>Continue</Btn>}
+          {step === 2 && <Btn variant="primary" size="lg" icon="bolt" onClick={() => onComplete(tracePath || "traces")}>Build my first eval</Btn>}
+          {step === 3 && <Btn variant="ghost" icon="chevLeft" onClick={() => setStep(2)}>Back to first eval</Btn>}
         </div>
       </div>
     </div>

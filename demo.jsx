@@ -176,14 +176,12 @@
       { chapter: "Describe", cap: "Describe in plain English what this agent does.", run: () => actSpot(() => document.querySelector("textarea"), 2800) },
       { chapter: "Describe", cap: "Next.", run: () => actClick(T("Continue", { contains: true, tag: "button" })) },
       { chapter: "Dataset", cap: "A trace records what the agent did on one input — we generate one per input by calling your agent's API.", run: () => actSpot(T("What's a trace?", { contains: true }), 2800) },
-      { chapter: "Dataset", cap: "For this demo, start from production traces — we work from them directly.", run: () => actClick(T("Production traces only", { contains: true, tag: "button" }), { after: 1100 }) },
+      { chapter: "Dataset", cap: "For this demo, start from production traces — we'll curate a dataset.", run: () => actClick(T("Production traces only", { contains: true, tag: "button" }), { after: 1100 }) },
       { chapter: "Dataset", cap: "Upload traces.zip.", run: () => actClick(T("Drop", { contains: true, tag: "button" })) },
       { chapter: "Dataset", cap: "512 traces parsed; schema auto-detected.", run: () => actSpot(T("512 traces parsed", { contains: true }), 2600) },
       { chapter: "Dataset", cap: "Continue.", run: () => actClick(T("Continue", { contains: true, tag: "button" })) },
-      { chapter: "First eval", cap: "The plan: analyze traces → derive rubric → score → report.", run: () => sleep(2800) },
-      { chapter: "First eval", cap: "Continue.", run: () => actClick(T("Continue", { contains: true, tag: "button" })) },
-      { chapter: "Optimization", cap: "Then iterate: gap → fix → re-run → compare. Same rubric, same dataset every time.", run: () => sleep(3000) },
-      { chapter: "Optimization", cap: "Start building.", run: () => actClick(T("Build my first eval", { contains: true, tag: "button" })) },
+      { chapter: "First eval", cap: "Next the agent will: analyze traces → generate rubric set → create dataset → baseline → report.", run: () => sleep(2800) },
+      { chapter: "First eval", cap: "Start building.", run: () => actClick(T("Build my first eval", { contains: true, tag: "button" })) },
     ];
   }
   function sceneT2() {
