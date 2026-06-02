@@ -5,7 +5,7 @@ const AGENT_TYPES = [
   { id: "support", name: "Support agent", desc: "RAG + tools over your help docs", icon: "review", placeholder: "A customer-support copilot for our SaaS. It answers questions about orders, refunds and shipment tracking by retrieving from our help center, and can call order_lookup and issue_refund tools." },
   { id: "rag", name: "RAG Q&A", desc: "Retrieval-augmented question answering", icon: "dataset", placeholder: "A documentation Q&A bot. Given a question, it retrieves passages from our docs and answers with citations." },
   { id: "code", name: "Code agent", desc: "Multi-step plan → edit → test", icon: "doc", placeholder: "A coding agent that takes a GitHub issue, plans a fix, edits files, and runs the test suite until it passes." },
-  { id: "other", name: "Something else", desc: "Describe it in your own words", icon: "bolt", placeholder: "Describe what your agent does, what it takes as input, the tools it can call, and what a good vs. bad answer looks like." },
+  { id: "other", name: "Something else", desc: "Describe it in your own words", icon: "bolt", placeholder: "Describe its purpose, target users, typical inputs, the tools or knowledge sources it can call, and what distinguishes a strong response from a weak one." },
 ];
 
 const SAMPLE_TRACE = `{
@@ -73,20 +73,23 @@ function OnboardingFlow({ onComplete, theme, toggleTheme }) {
         {/* STEP 0 — describe */}
         {step === 0 && <div className="col gap-5 view-enter">
           <div><div className="row gap-2" style={{ marginBottom: 8 }}><AgentAvatar id="copilot" size={24} /><span className="faint" style={{ fontSize: 12.5 }}>Eval Copilot</span></div>
-            <h1 style={{ fontSize: 24, fontWeight: 800, letterSpacing: "-0.03em" }}>What are you evaluating?</h1>
-            <p className="muted" style={{ fontSize: 13.5, marginTop: 6 }}>Pick the closest match, then describe it — I'll read this to draft your dataset and rubric.</p></div>
-          <div className="row gap-3 wrap">
-            {AGENT_TYPES.map((t) => <button key={t.id} onClick={() => pickType(t)} style={{ flex: "1 1 calc(50% - 6px)", minWidth: 200, textAlign: "left", padding: 15, borderRadius: "var(--r-lg)", border: `1.5px solid ${type === t.id ? "var(--accent)" : "var(--border)"}`, background: type === t.id ? "var(--accent-soft)" : "var(--surface)", transition: "all .13s" }}>
-              <div className="row gap-2" style={{ marginBottom: 8 }}><span style={{ width: 30, height: 30, borderRadius: 8, background: type === t.id ? "var(--accent)" : "var(--surface-3)", color: type === t.id ? "white" : "var(--text-2)", display: "flex", alignItems: "center", justifyContent: "center" }}>{window.Icons[t.icon]({ size: 16 })}</span>{type === t.id && <span style={{ marginLeft: "auto", color: "var(--accent)" }}>{window.Icons.check({ size: 17, sw: 2.4 })}</span>}</div>
-              <div style={{ fontSize: 13.5, fontWeight: 700 }}>{t.name}</div><div className="faint" style={{ fontSize: 12, marginTop: 2 }}>{t.desc}</div>
-            </button>)}
+            <h1 style={{ fontSize: 24, fontWeight: 800, letterSpacing: "-0.03em" }}>Tell us about your agent</h1>
+            <p className="muted" style={{ fontSize: 13.5, marginTop: 6 }}>These details inform the dataset, rubric, and judge I'll draft for you.</p></div>
+          <div className="col gap-2">
+            <span style={{ fontSize: 13, fontWeight: 600 }}>Agent type</span>
+            <div className="row gap-3 wrap">
+              {AGENT_TYPES.map((t) => <button key={t.id} onClick={() => pickType(t)} style={{ flex: "1 1 calc(50% - 6px)", minWidth: 200, textAlign: "left", padding: 15, borderRadius: "var(--r-lg)", border: `1.5px solid ${type === t.id ? "var(--accent)" : "var(--border)"}`, background: type === t.id ? "var(--accent-soft)" : "var(--surface)", transition: "all .13s" }}>
+                <div className="row gap-2" style={{ marginBottom: 8 }}><span style={{ width: 30, height: 30, borderRadius: 8, background: type === t.id ? "var(--accent)" : "var(--surface-3)", color: type === t.id ? "white" : "var(--text-2)", display: "flex", alignItems: "center", justifyContent: "center" }}>{window.Icons[t.icon]({ size: 16 })}</span>{type === t.id && <span style={{ marginLeft: "auto", color: "var(--accent)" }}>{window.Icons.check({ size: 17, sw: 2.4 })}</span>}</div>
+                <div style={{ fontSize: 13.5, fontWeight: 700 }}>{t.name}</div><div className="faint" style={{ fontSize: 12, marginTop: 2 }}>{t.desc}</div>
+              </button>)}
+            </div>
           </div>
           <Field label="Agent name"><Input value={agentName} onChange={(e) => setAgentName(e.target.value)} /></Field>
           <div className="col gap-2">
-            <span style={{ fontSize: 13, fontWeight: 600 }}>What does it do?</span>
-            <textarea value={desc} onChange={(e) => setDesc(e.target.value)} rows={4} placeholder="Describe what your agent does, its inputs, the tools it calls, and what a good vs. bad answer looks like." style={{ padding: "11px 13px", borderRadius: "var(--r-md)", border: "1px solid var(--border-strong)", background: "var(--surface)", outline: "none", fontSize: 13.5, resize: "vertical", lineHeight: 1.55, fontFamily: "var(--font-sans)" }}
+            <span style={{ fontSize: 13, fontWeight: 600 }}>Describe your agent</span>
+            <textarea value={desc} onChange={(e) => setDesc(e.target.value)} rows={4} placeholder="Describe its purpose, target users, typical inputs, the tools or knowledge sources it can call, and what distinguishes a strong response from a weak one." style={{ padding: "11px 13px", borderRadius: "var(--r-md)", border: "1px solid var(--border-strong)", background: "var(--surface)", outline: "none", fontSize: 13.5, resize: "vertical", lineHeight: 1.55, fontFamily: "var(--font-sans)" }}
               onFocus={(e) => { e.target.style.borderColor = "var(--accent)"; e.target.style.boxShadow = "0 0 0 3px var(--accent-soft)"; }} onBlur={(e) => { e.target.style.borderColor = "var(--border-strong)"; e.target.style.boxShadow = "none"; }} />
-            <span className="row gap-1 faint" style={{ fontSize: 11.5 }}>{window.Icons.bolt({ size: 13, style: { color: "var(--accent-text)" } })} The more concrete you are about good vs. bad, the sharper the rubric.</span>
+            <span className="row gap-1 faint" style={{ fontSize: 11.5 }}>{window.Icons.bolt({ size: 13, style: { color: "var(--accent-text)" } })} Cover purpose, target users, inputs, tools or knowledge sources, and what distinguishes a strong vs. weak answer.</span>
           </div>
         </div>}
 
