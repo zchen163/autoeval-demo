@@ -140,36 +140,7 @@
   }
   const askComposer = (text) => actType(findInput("tell the agent"), text);
 
-  // ---------------- scripts (simplified: onboarding → daily monitor) ----------------
-  function scene1() {
-    return [
-      { chapter: "Onboarding", cap: "Brand-new customer: starting from an empty account.", run: () => sleep(2200) },
-      { chapter: "Onboarding", cap: "Create the org — the first user becomes Admin.", run: () => actClick(T("Create org", { tag: "button" })) },
-      { chapter: "Onboarding", cap: "Continue.", run: () => actClick(T("Create org & continue", { contains: true, tag: "button" })) },
-      { chapter: "Describe", cap: "Describe in plain English what this chat agent does.", run: () => actSpot(() => document.querySelector("textarea"), 2800) },
-      { chapter: "Describe", cap: "Next.", run: () => actClick(T("Continue", { contains: true, tag: "button" })) },
-      { chapter: "Bring labeled data", cap: "Third option: I have a batch of chat samples that I've manually labeled with scores.", run: () => actClick(T("I have a labeled set", { contains: true, tag: "button" }), { after: 1100 }) },
-      { chapter: "Bring labeled data", cap: "Upload my labeled.csv (input + output + scores).", run: () => actClick(T("Drop", { contains: true, tag: "button" })) },
-      { chapter: "Bring labeled data", cap: "120 human-labeled samples loaded; columns auto-detected.", run: () => actSpot(T("120 labeled examples", { contains: true }), 2600) },
-      { chapter: "Bring labeled data", cap: "Continue.", run: () => actClick(T("Continue", { contains: true, tag: "button" })) },
-      { chapter: "First eval", cap: "Next the agent will: infer rubric → generate golden → run daily → monitor.", run: () => sleep(2800) },
-      { chapter: "First eval", cap: "Start building.", run: () => actClick(T("Build my first eval", { contains: true, tag: "button" })) },
-    ];
-  }
-  function scene2() {
-    return [
-      { chapter: "Generate rubric", cap: "Copilot infers the rubric from my labels — what separates high from low scores.", run: async () => {
-          const running = await poll(() => findText("inferred from your labels", { contains: true }) || findText("Approve", { tag: "button" }), 6000);
-          await sleep(600);
-        } },
-      { chapter: "Generate rubric", cap: "View the inferred rubric.", run: () => actClick(T("inferred from your labels", { contains: true }), { optional: true }) },
-      { chapter: "Generate rubric", cap: "Approve the rubric.", run: () => actClick(T("Approve", { tag: "button" })) },
-      { chapter: "Generate golden", cap: "Next: turn these 120 labels into a golden dataset — all human ground truth.", run: () => actClick(T("Golden dataset — from your labels", { contains: true }), { optional: true }) },
-      { chapter: "Generate golden", cap: "Approve the golden dataset.", run: () => actClick(T("Approve", { tag: "button" })) },
-      { chapter: "Daily run", cap: "Using this fixed rubric, run today's evaluation automatically…", run: () => poll(T("Today's run", { contains: true }), 12000).then(() => sleep(800)) },
-      { chapter: "Daily run", cap: "Today's results are scored per rubric dimension and aligned with my labels (0.89).", run: () => actSpot(T("Today's run", { contains: true }), 3600) },
-    ];
-  }
+  // ---------------- scripts ----------------
   function scene3() {
     return [
       { chapter: "Daily monitor", cap: "Last page: with this fixed rubric, continuously compare each day's results.", run: async () => {
@@ -186,7 +157,6 @@
   }
   function buildScript(scene) {
     if (scene === 1) return [...sceneT1(), ...sceneT2(), ...sceneT3()]; // onboarding = prod-trace flow
-    if (scene === 2) return scene2();
     if (scene === 3) return scene3();
     if (scene === 7) return [...sceneT1(), ...sceneT2(), ...sceneT3()]; // full trace-upload flow
     if (scene === 8) return sceneReview(); // returning customer · daily prod-log review
