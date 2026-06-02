@@ -189,11 +189,9 @@
       { chapter: "Build eval", cap: "Copilot takes over, producing proposals step by step, awaiting my approval at each one.", run: () => poll(() => findText("Looks right", { tag: "button" }) || findText("Analyzed all 512 logs", { contains: true }), 6000).then(() => sleep(500)) },
       { chapter: "Analyze logs", cap: "① Analyze logs as a whole first — topic distribution, score distribution, latency — not just failures.", run: () => actClick(T("Analyzed all 512 logs", { contains: true }), { optional: true }) },
       { chapter: "Analyze logs", cap: "Confirm the analysis.", run: () => actClick(T("Looks right", { tag: "button" })) },
-      { chapter: "Rubric", cap: "② Infer rubric criteria from the logs — coverage, helpfulness, tone.", run: () => actClick(() => findText("Rubric — from your logs", { contains: true }), { optional: true }) },
+      { chapter: "Rubric", cap: "② Derive a rubric from the trace distribution — coverage, helpfulness, tone.", run: () => actClick(() => findText("Rubric — from your logs", { contains: true }), { optional: true }) },
       { chapter: "Rubric", cap: "Approve the rubric.", run: () => actClick(T("Approve", { tag: "button" })) },
-      { chapter: "Dataset", cap: "③ Generate a golden dataset based on this rubric.", run: () => actClick(() => findText("Dataset — Support QA v1", { contains: true }), { optional: true }) },
-      { chapter: "Dataset", cap: "Approve the dataset.", run: () => actClick(T("Approve", { tag: "button" })) },
-      { chapter: "Baseline", cap: "④ Run baseline automatically — scoring in progress…", run: () => poll(T("Top gaps, ranked by impact", { contains: true }), 22000) },
+      { chapter: "Baseline", cap: "③ Score every trace against the rubric — baseline in progress…", run: () => poll(T("Top gaps, ranked by impact", { contains: true }), 22000) },
     ];
   }
   function sceneT3() {

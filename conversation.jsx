@@ -97,12 +97,12 @@ function ConversationPane({ openCanvas, canvas, push, autostart, autostartPath }
   const describeMode = bootstrap === "describe";
   const flow = labeledMode ? ["rubric", "dataset", "daily", "monitor"]
     : describeMode ? ["dataset", "rubric", "baseline", "report"]
-    : ["cluster", "rubric", "dataset", "baseline", "report"];
+    : ["cluster", "rubric", "baseline", "report"];
   const planLabels = labeledMode
     ? ["Calibrate a rubric against your labels", "Confirm your golden dataset", "Call your agent and score each trace", "Open the continuous monitor"]
     : describeMode
     ? ["Synthesize a starter dataset from your description", "Discover a rubric", "Run a baseline", "Summarize & recommend"]
-    : ["Analyze traces & extract behaviors", "Auto-generate a rubric set from the logs", "Create the evaluation dataset", "Run baseline evaluation", "Review report & recommendations"];
+    : ["Analyze traces — topics, distribution, behaviors", "Derive a rubric from the trace distribution", "Score every trace against the rubric — baseline", "Review report & recommendations"];
   const STEP_META = {
     cluster: { agent: "triage", label: "Triage Agent analyzing all 512 traces & extracting behaviors…" },
     dataset: { agent: "dataset", label: labeledMode ? "Confirming your golden dataset…" : describeMode ? "Dataset Agent synthesizing starter cases…" : "Dataset Agent building the golden dataset…" },
