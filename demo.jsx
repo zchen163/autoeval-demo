@@ -172,6 +172,7 @@
   // ---- trace-upload-only variant (onboard via traces → build eval → report) ----
   function sceneT1() {
     return [
+      { chapter: "Sign in", cap: "Sign in to AutoEval.", run: () => actClick(T("Sign in", { tag: "button" })) },
       { chapter: "Describe", cap: "Describe in plain English what this agent does.", run: () => actSpot(() => document.querySelector("textarea"), 2800) },
       { chapter: "Describe", cap: "Next.", run: () => actClick(T("Continue", { contains: true, tag: "button" })) },
       { chapter: "Upload traces", cap: "I have historical traces — import a batch directly.", run: () => actClick(T("I have sample traces", { contains: true, tag: "button" }), { after: 1100 }) },
@@ -225,10 +226,15 @@
 
   // ---------------- boot / scene control ----------------
   function preconditions(scene) {
-    // login skipped — always authed. scenes 0/1/7 still begin from a fresh onboarding.
-    localStorage.setItem("ae_authed", "1");
-    if (scene === 0 || scene === 1 || scene === 7) { localStorage.setItem("ae_onboarded", "0"); }
-    else { localStorage.setItem("ae_onboarded", "1"); }
+    // Offline eval (scene 1) starts at the Sign-in screen for a webpage feel;
+    // other scenes drop straight into an authed, onboarded session.
+    if (scene === 1) {
+      localStorage.setItem("ae_authed", "0");
+      localStorage.setItem("ae_onboarded", "0");
+    } else {
+      localStorage.setItem("ae_authed", "1");
+      localStorage.setItem("ae_onboarded", "1");
+    }
   }
   function startScene(scene) {
     preconditions(scene);
