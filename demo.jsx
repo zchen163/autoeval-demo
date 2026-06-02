@@ -83,7 +83,7 @@
     playBtn.onclick = togglePause;
     host.querySelector(".aed-restart").onclick = () => startScene(state.scene);
     host.querySelector(".aed-exit").onclick = exitDemo;
-    const chaps = [[0, "▸ Full"], [1, "1 · Onboarding"], [3, "2 · Daily monitor"], [8, "3 · Daily review"]];
+    const chaps = [[1, "1 · Onboarding"], [3, "2 · Daily monitor"], [8, "3 · Daily review"]];
     chaps.forEach(([n, label]) => { const b = document.createElement("button"); b.className = "aed-chap"; b.dataset.scene = n; b.textContent = label; b.onclick = () => startScene(n); chapWrap.appendChild(b); });
   }
   function markChapter() { [...chapWrap.children].forEach((c) => c.classList.toggle("on", +c.dataset.scene === state.scene)); }
@@ -290,7 +290,7 @@
     buildHost();
     host.querySelector(".aed-bar").style.display = "none";
     const b = document.createElement("button"); b.className = "aed-launch";
-    b.innerHTML = "▶ Play demo"; b.onclick = () => startScene(0);
+    b.innerHTML = "▶ Play demo"; b.onclick = () => startScene(1);
     host.appendChild(b);
   }
 
