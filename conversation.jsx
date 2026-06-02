@@ -51,6 +51,7 @@ function routeIntent(text) {
   if (has("key", "billing", "provider", "cost")) return { route: { view: "keys" }, say: "API keys. Note your Gemini panel judge is paused — no Google key set." };
   if (has("member", "org", "team", "invite")) return { route: { view: "settings" }, say: "Org & members." };
   if (has("dashboard", "trend", "leaderboard", "rank", "overview", "this week")) return { route: { view: "dashboard" }, say: "Project overview. Best config is v1.3 + memory at 0.84; quality is trending up over the last 8 runs." };
+  if (has("report", "results", "first eval", "recommendations")) return { route: { view: "report" }, say: "Here's the v1.2 baseline report — overall 0.712, top gaps ranked by impact with a suggested fix for each." };
   if (has("experiment", "run ", "baseline", "v1.")) return { route: { view: "experiments" }, say: "Opened experiments. Want me to run a new one or open a specific version?" };
   return null;
 }
