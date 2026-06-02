@@ -72,7 +72,7 @@ function OnboardingFlow({ onComplete, theme, toggleTheme }) {
 
         {/* STEP 0 — describe */}
         {step === 0 && <div className="col gap-5 view-enter">
-          <div><div className="row gap-2" style={{ marginBottom: 8 }}><AgentAvatar id="copilot" size={24} /><span className="faint" style={{ fontSize: 12.5 }}>Eval Copilot</span></div>
+          <div><div className="row gap-2" style={{ marginBottom: 8 }}><AgentAvatar id="copilot" size={24} /><span className="faint" style={{ fontSize: 12.5 }}>AutoEval</span></div>
             <h1 style={{ fontSize: 24, fontWeight: 800, letterSpacing: "-0.03em" }}>Tell us about your agent</h1>
             <p className="muted" style={{ fontSize: 13.5, marginTop: 6 }}>These details inform the dataset, rubric, and judge I'll draft for you.</p></div>
           <div className="col gap-2">
@@ -95,7 +95,7 @@ function OnboardingFlow({ onComplete, theme, toggleTheme }) {
 
         {/* STEP 1 — golden dataset + trace generation */}
         {step === 1 && <div className="col gap-5 view-enter">
-          <div><div className="row gap-2" style={{ marginBottom: 8 }}><AgentAvatar id="copilot" size={24} /><span className="faint" style={{ fontSize: 12.5 }}>Eval Copilot</span></div>
+          <div><div className="row gap-2" style={{ marginBottom: 8 }}><AgentAvatar id="copilot" size={24} /><span className="faint" style={{ fontSize: 12.5 }}>AutoEval</span></div>
             <h1 style={{ fontSize: 24, fontWeight: 800, letterSpacing: "-0.03em" }}>Connect a golden dataset</h1>
             <p className="muted" style={{ fontSize: 13.5, marginTop: 6, lineHeight: 1.55 }}>A <b>golden dataset</b> is the set of inputs (and, ideally, <b>labels</b> — your ideal outputs or per-criterion scores) we'll evaluate your agent against. I'll call your agent on every input to capture <b>traces</b>, then score each trace against the rubric — that's how we find the gaps and target improvements.</p></div>
 
@@ -174,7 +174,7 @@ function OnboardingFlow({ onComplete, theme, toggleTheme }) {
 
         {/* STEP 2 — first eval */}
         {step === 2 && <div className="col gap-5 view-enter">
-          <div><div className="row gap-2" style={{ marginBottom: 8 }}><AgentAvatar id="copilot" size={24} /><span className="faint" style={{ fontSize: 12.5 }}>Eval Copilot</span></div>
+          <div><div className="row gap-2" style={{ marginBottom: 8 }}><AgentAvatar id="copilot" size={24} /><span className="faint" style={{ fontSize: 12.5 }}>AutoEval</span></div>
             <h1 style={{ fontSize: 24, fontWeight: 800, letterSpacing: "-0.03em" }}>Ready to build your first eval</h1>
             <p className="muted" style={{ fontSize: 13.5, marginTop: 6 }}>{tracePath === "labeled" ? "You brought labeled goldens — I'll run your agent on every input, score each trace against the rubric calibrated to your labels, and surface the gaps." : tracePath === "unlabeled" ? "You brought goldens without labels — I'll run your agent, auto-label each trace with a strong judge model (yours to review), then score against the rubric." : "You brought production traces — I'll analyze them, derive a rubric from the trace distribution, then score every trace against it."}</p></div>
           <div className="col gap-2" style={{ padding: "8px 4px" }}>
@@ -190,13 +190,13 @@ function OnboardingFlow({ onComplete, theme, toggleTheme }) {
             </div>)}
           </div>
           <div className="row gap-2" style={{ padding: "10px 12px", borderRadius: "var(--r-md)", background: "var(--surface-2)", border: "1px solid var(--border)", fontSize: 12 }}>
-            {window.Icons.info({ size: 15, style: { color: "var(--text-3)", flexShrink: 0 } })}<span className="muted">Copilot runs on the platform model — free. The baseline run uses your provider key.</span>
+            {window.Icons.info({ size: 15, style: { color: "var(--text-3)", flexShrink: 0 } })}<span className="muted">AutoEval runs on the platform model — free. The baseline run uses your provider key.</span>
           </div>
         </div>}
 
         {/* STEP 3 — iterative optimization */}
         {step === 3 && <div className="col gap-5 view-enter">
-          <div><div className="row gap-2" style={{ marginBottom: 8 }}><AgentAvatar id="copilot" size={24} /><span className="faint" style={{ fontSize: 12.5 }}>Eval Copilot</span></div>
+          <div><div className="row gap-2" style={{ marginBottom: 8 }}><AgentAvatar id="copilot" size={24} /><span className="faint" style={{ fontSize: 12.5 }}>AutoEval</span></div>
             <h1 style={{ fontSize: 24, fontWeight: 800, letterSpacing: "-0.03em" }}>Then iterate to improve</h1>
             <p className="muted" style={{ fontSize: 13.5, marginTop: 6, lineHeight: 1.55 }}>The first eval is just the baseline. You'll iterate from here: take a suggested fix from the report, re-run against the <b>same rubric and same dataset</b>, and compare. Same ruler every iteration — real, comparable progress.</p></div>
           <div className="col gap-2" style={{ padding: "8px 4px" }}>

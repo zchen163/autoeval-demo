@@ -88,7 +88,7 @@ function KeysView({ push }) {
     {/* billing boundary explainer */}
     <div className="row gap-3" style={{ padding: "12px 15px", borderRadius: "var(--r-lg)", background: "var(--surface-2)", border: "1px solid var(--border)" }}>
       {window.Icons.info({ size: 17, style: { color: "var(--accent-text)", flexShrink: 0, marginTop: 1 } })}
-      <div style={{ fontSize: 12.5, lineHeight: 1.55 }}><b>Who pays for what.</b> The Eval Agents (Copilot, Rubric, Dataset, Triage) think on the <b>platform model — we cover that</b>, no key needed. The eval they orchestrate — your agent's generation + the judges' scoring — runs on <b>your provider keys below</b>.</div>
+      <div style={{ fontSize: 12.5, lineHeight: 1.55 }}><b>Who pays for what.</b> The Eval Agents (AutoEval, Rubric, Dataset, Triage) think on the <b>platform model — we cover that</b>, no key needed. The eval they orchestrate — your agent's generation + the judges' scoring — runs on <b>your provider keys below</b>.</div>
     </div>
     {!isAdmin && <div className="row gap-2" style={{ padding: "10px 14px", borderRadius: "var(--r-md)", background: "var(--surface-2)", border: "1px solid var(--border)", fontSize: 12.5 }}>{window.Icons.info({ size: 15, style: { color: "var(--text-3)" } })}<span className="muted">Only Admins can create or revoke keys. You can view the masked list.</span></div>}
 

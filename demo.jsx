@@ -186,7 +186,7 @@
   }
   function sceneT2() {
     return [
-      { chapter: "Build eval", cap: "Copilot takes over, producing proposals step by step, awaiting my approval at each one.", run: () => poll(() => findText("Looks right", { tag: "button" }) || findText("Analyzed all 512 logs", { contains: true }), 6000).then(() => sleep(500)) },
+      { chapter: "Build eval", cap: "AutoEval takes over, producing proposals step by step, awaiting my approval at each one.", run: () => poll(() => findText("Looks right", { tag: "button" }) || findText("Analyzed all 512 logs", { contains: true }), 6000).then(() => sleep(500)) },
       { chapter: "Analyze logs", cap: "① Analyze logs as a whole first — topic distribution, score distribution, latency — not just failures.", run: () => actClick(T("Analyzed all 512 logs", { contains: true }), { optional: true }) },
       { chapter: "Analyze logs", cap: "Confirm the analysis.", run: () => actClick(T("Looks right", { tag: "button" })) },
       { chapter: "Rubric", cap: "② Derive a rubric from the trace distribution — coverage, helpfulness, tone.", run: () => actClick(() => findText("Rubric — from your logs", { contains: true }), { optional: true }) },

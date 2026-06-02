@@ -4,7 +4,7 @@
 
   // ---- Agent identities ----
   const AGENTS = {
-    copilot: { id: "copilot", name: "Eval Copilot", role: "Orchestrator", icon: "bolt", hue: 265, blurb: "Understands intent, orchestrates the expert agents + primitives." },
+    copilot: { id: "copilot", name: "AutoEval", role: "Orchestrator", icon: "bolt", hue: 265, blurb: "Understands intent, orchestrates the expert agents + primitives." },
     rubric: { id: "rubric", name: "Rubric Agent", role: "Criteria", icon: "ruler", hue: 200, blurb: "Drafts & refines rubrics; discovers criteria from real failures." },
     dataset: { id: "dataset", name: "Dataset Agent", role: "Data", icon: "dataset", hue: 155, blurb: "Synthesizes + mines datasets with provenance." },
     triage: { id: "triage", name: "Triage Agent", role: "Logs", icon: "trace", hue: 35, blurb: "Clusters prod logs, pre-scores, routes the high-signal 2% to humans." },

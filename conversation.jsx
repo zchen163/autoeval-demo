@@ -202,7 +202,7 @@ function ConversationPane({ openCanvas, canvas, push, autostart, autostartPath }
   return <div className="col" style={{ height: "100%" }}>
     {/* header */}
     <div className="row" style={{ justifyContent: "space-between", padding: "14px 16px", borderBottom: "1px solid var(--border)", flexShrink: 0 }}>
-      <div className="row gap-2"><AgentAvatar id="copilot" size={28} /><div><div style={{ fontSize: 13.5, fontWeight: 700 }}>Eval Copilot</div><div className="faint" style={{ fontSize: 11 }}>Support Copilot · agent session</div></div></div>
+      <div className="row gap-2"><AgentAvatar id="copilot" size={28} /><div><div style={{ fontSize: 13.5, fontWeight: 700 }}>AutoEval</div><div className="faint" style={{ fontSize: 11 }}>Support Copilot · agent session</div></div></div>
       <AutonomyBadge level="draft" />
     </div>
 
@@ -336,7 +336,7 @@ function ConversationPane({ openCanvas, canvas, push, autostart, autostartPath }
         <input value={draft} onChange={(e) => setDraft(e.target.value)} onKeyDown={(e) => e.key === "Enter" && submit()} placeholder="Tell the agent what you want to evaluate…" style={{ flex: 1, border: "none", outline: "none", background: "transparent", fontSize: 13 }} />
         <Btn variant="primary" icon="send" onClick={() => submit()} />
       </div>
-      <p className="faint" style={{ fontSize: 10, textAlign: "center", marginTop: 6 }}>Copilot runs on the platform model. The eval it runs uses your provider keys.</p>
+      <p className="faint" style={{ fontSize: 10, textAlign: "center", marginTop: 6 }}>AutoEval runs on the platform model. The eval it runs uses your provider keys.</p>
     </div>
   </div>;
 }

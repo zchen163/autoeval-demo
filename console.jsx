@@ -43,7 +43,7 @@ function CanvasHeader({ route, onOpenPalette, onClose, onPin }) {
   };
   return <div className="row" style={{ justifyContent: "space-between", padding: "11px 18px", borderBottom: "1px solid var(--border)", background: "var(--surface)", flexShrink: 0 }}>
     <div className="row gap-2" style={{ fontSize: 12.5, color: "var(--text-3)" }}>
-      <span className="row gap-1" style={{ color: "var(--accent-text)" }}>{window.Icons.bolt({ size: 14 })}<span style={{ fontWeight: 600 }}>opened by Copilot</span></span>
+      <span className="row gap-1" style={{ color: "var(--accent-text)" }}>{window.Icons.bolt({ size: 14 })}<span style={{ fontWeight: 600 }}>opened by AutoEval</span></span>
       {window.Icons.chevRight({ size: 13, style: { opacity: 0.5 } })}
       <span style={{ color: "var(--text)", fontWeight: 600 }}>{titleMap[route.view] || route.view}</span>
     </div>
@@ -117,7 +117,7 @@ function CommandPalette({ open, onClose, openCanvas, onAsk }) {
       <div style={{ maxHeight: 360, overflowY: "auto", padding: 7 }}>
         {askable && <button onClick={() => { onAsk(q); onClose(); }} className="row gap-3" style={{ width: "100%", textAlign: "left", padding: "11px 12px", borderRadius: "var(--r-md)", background: "var(--accent-soft)", marginBottom: 4 }}>
           <span style={{ width: 30, height: 30, borderRadius: 8, background: "var(--accent)", color: "white", display: "flex", alignItems: "center", justifyContent: "center", flexShrink: 0 }}>{window.Icons.send({ size: 15 })}</span>
-          <div style={{ minWidth: 0 }}><div style={{ fontSize: 13, fontWeight: 600 }}>Ask Copilot</div><div className="faint" style={{ fontSize: 11.5, whiteSpace: "nowrap", overflow: "hidden", textOverflow: "ellipsis" }}>“{q}”</div></div>
+          <div style={{ minWidth: 0 }}><div style={{ fontSize: 13, fontWeight: 600 }}>Ask AutoEval</div><div className="faint" style={{ fontSize: 11.5, whiteSpace: "nowrap", overflow: "hidden", textOverflow: "ellipsis" }}>“{q}”</div></div>
         </button>}
         {!askable && <div className="faint" style={{ fontSize: 10.5, fontWeight: 700, textTransform: "uppercase", letterSpacing: "0.05em", padding: "8px 10px 4px" }}>Jump to artifact</div>}
         {matches.map((d) => <button key={d.label} onClick={() => { openCanvas(d, true); onClose(); }} className="row gap-3" style={{ width: "100%", textAlign: "left", padding: "9px 12px", borderRadius: "var(--r-md)", transition: "background .1s" }}
