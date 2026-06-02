@@ -83,7 +83,7 @@
     playBtn.onclick = togglePause;
     host.querySelector(".aed-restart").onclick = () => startScene(state.scene);
     host.querySelector(".aed-exit").onclick = exitDemo;
-    const chaps = [[1, "1 · Onboarding"], [3, "2 · Daily monitor"], [8, "3 · Daily review"]];
+    const chaps = [[1, "A · Offline eval"], [8, "B · Online monitoring"]];
     chaps.forEach(([n, label]) => { const b = document.createElement("button"); b.className = "aed-chap"; b.dataset.scene = n; b.textContent = label; b.onclick = () => startScene(n); chapWrap.appendChild(b); });
   }
   function markChapter() { [...chapWrap.children].forEach((c) => c.classList.toggle("on", +c.dataset.scene === state.scene)); }
@@ -141,26 +141,10 @@
   const askComposer = (text) => actType(findInput("tell the agent"), text);
 
   // ---------------- scripts ----------------
-  function scene3() {
-    return [
-      { chapter: "Daily monitor", cap: "Last page: with this fixed rubric, continuously compare each day's results.", run: async () => {
-          const open = await poll(T("Rubric performance over time", { contains: true }), 2500);
-          if (!open) await askComposer("show me performance over time");
-          await sleep(600);
-        } },
-      { chapter: "Daily monitor", cap: "Time series per rubric dimension — offline batch + online sampling, with deployment points marked on the axis.", run: () => actSpot(T("Rubric performance over time", { contains: true }), 3800) },
-      { chapter: "Daily monitor", cap: "Overlay any dimension to compare.", run: () => actClick(T("Faithfulness", { tag: "button" }), { optional: true, after: 1100 }) },
-      { chapter: "Daily monitor", cap: "Threshold breaches are auto-captured as regressions and localized to the specific deployment.", run: () => actSpot(T("Detected regressions", { contains: true }), 3400) },
-      { chapter: "Daily monitor", cap: "Set an alert — notify when overall score drops below threshold.", run: () => actClick(T("Set up an alert", { contains: true, tag: "button" }), { optional: true }) },
-      { chapter: "Done", cap: "Full loop: my labels → rubric + golden → daily runs → continuous comparison against the same ruler.", run: () => sleep(3000) },
-    ];
-  }
   function buildScript(scene) {
-    if (scene === 1) return [...sceneT1(), ...sceneT2(), ...sceneT3()]; // onboarding = prod-trace flow
-    if (scene === 3) return scene3();
-    if (scene === 7) return [...sceneT1(), ...sceneT2(), ...sceneT3()]; // full trace-upload flow
-    if (scene === 8) return sceneReview(); // returning customer · daily prod-log review
-    return [...sceneT1(), ...sceneT2(), ...sceneT3()]; // full = prod-trace flow
+    if (scene === 1) return [...sceneT1(), ...sceneT2(), ...sceneT3()]; // A · Offline eval
+    if (scene === 8) return sceneReview();                              // B · Online monitoring
+    return [...sceneT1(), ...sceneT2(), ...sceneT3()];                  // default = Offline
   }
 
   // ---- returning customer: log in → review prod logs → rubric suggestions → flag for review ----
@@ -169,6 +153,9 @@
       { chapter: "Daily review", cap: "Returning customer signs in to start the daily check-in.", run: () => sleep(2200) },
       { chapter: "Dashboard", cap: "Ask first — how's this week overall?", run: () => askComposer("show me this week's dashboard") },
       { chapter: "Dashboard", cap: "Recent dashboard — quality score trend, leaderboard, to-dos.", run: () => actSpot(T("Quality score trend", { contains: true }), 3600) },
+      { chapter: "Monitor", cap: "Now drill into the continuous rubric monitor.", run: () => askComposer("show me performance over time") },
+      { chapter: "Monitor", cap: "Time series per rubric dimension — deployment points marked on the axis.", run: () => actSpot(T("Rubric performance over time", { contains: true }), 3600) },
+      { chapter: "Monitor", cap: "Regressions auto-captured and localized to the deploy that broke them.", run: () => actSpot(T("Detected regressions", { contains: true }), 3200) },
       { chapter: "Prod logs", cap: "Now review last week's production logs.", run: () => askComposer("review last week's prod logs") },
       { chapter: "Prod logs", cap: "Have Triage analyze the logs as a whole.", run: () => actClick(T("Analyze all logs", { contains: true, tag: "button" }), { optional: true, after: 1100 }) },
       { chapter: "Prod logs", cap: "Overall log analysis — topic distribution + score distribution; most are healthy.", run: () => actSpot(T("Overall log analysis", { contains: true }), 3400) },
@@ -218,10 +205,7 @@
       { chapter: "Report", cap: "Overall score, plus judge agreement and pass rate.", run: () => actSpot(T("Weighted overall", { contains: true }), 2800) },
       { chapter: "Report", cap: "Per-rubric dimension breakdown — strong vs. weak.", run: () => actSpot(T("Score by rubric dimension", { contains: true }), 2600) },
       { chapter: "Report", cap: "Fix suggestions ranked by impact.", run: () => actSpot(T("Top gaps, ranked by impact", { contains: true }), 3000) },
-      { chapter: "Daily monitor", cap: "This isn't one-off — from here on, the same rubric runs every day.", run: () => askComposer("show me performance over time") },
-      { chapter: "Daily monitor", cap: "Overall trend line — score over time, with deployment points marked on the axis.", run: () => actSpot(T("Rubric performance over time", { contains: true }), 3800) },
-      { chapter: "Daily monitor", cap: "Threshold breaches are auto-captured as regressions and localized to the specific deployment.", run: () => actSpot(T("Detected regressions", { contains: true }), 3200) },
-      { chapter: "Done", cap: "From uploading a batch of traces to continuous daily monitoring — the loop is complete.", run: () => sleep(2800) },
+      { chapter: "Done", cap: "Offline eval is live — calibrated rubric, golden dataset, judge, and a baseline report.", run: () => sleep(2800) },
     ];
   }
 
