@@ -142,9 +142,9 @@
 
   // ---------------- scripts ----------------
   function buildScript(scene) {
-    if (scene === 1) return [...sceneT1(), ...sceneT2(), ...sceneT3()]; // A · Offline eval
-    if (scene === 8) return sceneReview();                              // B · Online monitoring
-    return [...sceneT1(), ...sceneT2(), ...sceneT3()];                  // default = Offline
+    if (scene === 1) return [...sceneT1(), ...sceneT2(), ...sceneT3(), ...sceneIterate()]; // A · Offline eval
+    if (scene === 8) return sceneReview();                                                  // B · Online monitoring
+    return [...sceneT1(), ...sceneT2(), ...sceneT3(), ...sceneIterate()];                   // default = Offline
   }
 
   // ---- returning customer: log in → review prod logs → rubric suggestions → flag for review ----
@@ -205,7 +205,18 @@
       { chapter: "Report", cap: "Overall score, plus judge agreement and pass rate.", run: () => actSpot(T("Weighted overall", { contains: true }), 2800) },
       { chapter: "Report", cap: "Per-rubric dimension breakdown — strong vs. weak.", run: () => actSpot(T("Score by rubric dimension", { contains: true }), 2600) },
       { chapter: "Report", cap: "Fix suggestions ranked by impact.", run: () => actSpot(T("Top gaps, ranked by impact", { contains: true }), 3000) },
-      { chapter: "Done", cap: "Offline eval is live — calibrated rubric, golden dataset, judge, and a baseline report.", run: () => sleep(2800) },
+    ];
+  }
+
+  // ---- iterate: take a suggestion → update prompt → re-run → compare ----
+  function sceneIterate() {
+    return [
+      { chapter: "Optimize", cap: "Take the highest-impact gap — order-number confirmation fails 61% of refunds.", run: () => actSpot(T("Order-number confirmation", { contains: true }), 2800) },
+      { chapter: "Optimize", cap: "Apply the suggested fix in your prompt — confirm order id before any refund tool call.", run: () => actSpot(T("Add a confirm-order step", { contains: true }), 3000) },
+      { chapter: "Optimize", cap: "Re-run as v1.3 against the same rubric and same dataset.", run: () => actClick(T("Compare to v1.3", { contains: true, tag: "button" })) },
+      { chapter: "Compare", cap: "v1.3 vs v1.2 baseline — see what the fix moved.", run: () => actSpot(T("Metric breakdown", { contains: true }), 3500) },
+      { chapter: "Compare", cap: "Most refund records pass now. Two regressions flagged for review.", run: () => actSpot(T("Per-record change", { contains: true }), 3000) },
+      { chapter: "Done", cap: "The loop: read gaps → fix the prompt → re-run → compare. Same ruler — real, comparable progress every iteration.", run: () => sleep(3000) },
     ];
   }
 
