@@ -8,40 +8,33 @@ const AGENT_TYPES = [
   { id: "other", name: "Something else", desc: "Describe it in your own words", icon: "bolt", placeholder: "Describe its purpose, target users, typical inputs, the tools or knowledge sources it can call, and what distinguishes a strong response from a weak one." },
 ];
 
-const SAMPLE_TRACE = `{
-  "input": "Where is my order #1042?",
-  "output": "Your order #1042 shipped on May 24 and is...",
-  "context": ["help/shipping#tracking", "orders/1042"],
-  "tools": [
-    { "name": "order_lookup", "args": { "id": "1042" } }
-  ],
-  "metadata": { "intent": "tracking", "user_tier": "pro" }
-}`;
-
 function OnboardingFlow({ onComplete, theme, toggleTheme }) {
   const [step, setStep] = useObS(0);
   const [type, setType] = useObS("support");
   const [agentName, setAgentName] = useObS("Support Copilot");
   const [desc, setDesc] = useObS(AGENT_TYPES[0].placeholder);
-  const [tracePath, setTracePath] = useObS(null); // 'traces' | 'describe' | 'labeled'
-  const [upload, setUpload] = useObS("idle"); // idle | parsing | done
-  const [labeledUp, setLabeledUp] = useObS("idle"); // idle | parsing | done
-  const [format, setFormat] = useObS(SAMPLE_TRACE);
-  const [copied, setCopied] = useObS(false);
+  const [tracePath, setTracePath] = useObS("labeled"); // 'labeled' | 'unlabeled' | 'traces'
+  const [upload, setUpload] = useObS("idle"); // idle | parsing | done — used by Production traces tab
+  const [dsUp, setDsUp] = useObS("idle"); // idle | parsing | done — used by Labeled/Unlabeled tabs (dataset csv)
+  const [endpoint, setEndpoint] = useObS("https://api.support-copilot.example/v1/chat");
+  const [useMockEndpoint, setUseMockEndpoint] = useObS(true);
   const [invites, setInvites] = useObS(["raj@northwind.ai"]);
   const [inviteDraft, setInviteDraft] = useObS("");
-  const labels = ["Describe", "Traces", "First eval"];
+  const labels = ["Describe", "Dataset", "First eval"];
   const key = "ne_live_" + "a91c7f3b2d80" + "9f4e1b6d3057";
 
   useObE(() => { if (upload === "parsing") { const t = setTimeout(() => setUpload("done"), 2200); return () => clearTimeout(t); } }, [upload]);
-  useObE(() => { if (labeledUp === "parsing") { const t = setTimeout(() => setLabeledUp("done"), 2200); return () => clearTimeout(t); } }, [labeledUp]);
+  useObE(() => { if (dsUp === "parsing") { const t = setTimeout(() => setDsUp("done"), 2200); return () => clearTimeout(t); } }, [dsUp]);
 
   const next = () => setStep((s) => Math.min(2, s + 1));
   const back = () => setStep((s) => Math.max(0, s - 1));
   const pickType = (t) => { setType(t.id); if (desc === AGENT_TYPES.find((x) => x.id === type)?.placeholder || !desc) setDesc(t.placeholder); };
 
+  const endpointOk = useMockEndpoint || endpoint.trim().length > 8;
   const canContinue = step === 0 ? agentName && desc.trim().length > 10
-    : step === 1 ? (tracePath === "traces" ? upload === "done" : tracePath === "describe" ? format.trim().length > 10 : tracePath === "labeled" ? labeledUp === "done" : false)
+    : step === 1 ? (tracePath === "traces" ? upload === "done"
+        : (tracePath === "labeled" || tracePath === "unlabeled") ? (dsUp === "done" && endpointOk)
+        : false)
     : true;
 
   return <div style={{ height: "100%", display: "flex", background: "var(--bg)" }}>
@@ -93,58 +86,81 @@ function OnboardingFlow({ onComplete, theme, toggleTheme }) {
           </div>
         </div>}
 
-        {/* STEP 1 — traces: two paths */}
+        {/* STEP 1 — golden dataset + trace generation */}
         {step === 1 && <div className="col gap-5 view-enter">
           <div><div className="row gap-2" style={{ marginBottom: 8 }}><AgentAvatar id="copilot" size={24} /><span className="faint" style={{ fontSize: 12.5 }}>Eval Copilot</span></div>
-            <h1 style={{ fontSize: 24, fontWeight: 800, letterSpacing: "-0.03em" }}>Get your first traces in</h1>
-            <p className="muted" style={{ fontSize: 13.5, marginTop: 6 }}>I work best starting from real sample traces. If you don't have any yet, I'll bootstrap from your description — I just need the trace shape.</p></div>
+            <h1 style={{ fontSize: 24, fontWeight: 800, letterSpacing: "-0.03em" }}>Connect a golden dataset</h1>
+            <p className="muted" style={{ fontSize: 13.5, marginTop: 6, lineHeight: 1.55 }}>A <b>golden dataset</b> is the set of inputs (and, ideally, <b>labels</b> — your ideal outputs or per-criterion scores) we'll evaluate your agent against. I'll call your agent on every input to capture <b>traces</b>, then score each trace against the rubric — that's how we find the gaps and target improvements.</p></div>
 
-          <div className="row gap-3">
-            {[["traces", "review", "I have sample traces", "Upload a .zip from your logs, or live-connect the SDK"],
-              ["labeled", "doc", "I have a labeled set", "Inputs, outputs + my own scores — chat agent"],
-              ["describe", "bolt", "No traces yet", "Bootstrap from my description + a trace format"]].map(([id, ic, t, d]) =>
-              <button key={id} onClick={() => setTracePath(id)} style={{ flex: 1, textAlign: "left", padding: 15, borderRadius: "var(--r-lg)", border: `1.5px solid ${tracePath === id ? "var(--accent)" : "var(--border)"}`, background: tracePath === id ? "var(--accent-soft)" : "var(--surface)", transition: "all .13s" }}>
-                <div className="row gap-2" style={{ marginBottom: 8 }}><span style={{ width: 30, height: 30, borderRadius: 8, background: tracePath === id ? "var(--accent)" : "var(--surface-3)", color: tracePath === id ? "white" : "var(--text-2)", display: "flex", alignItems: "center", justifyContent: "center" }}>{window.Icons[ic]({ size: 16 })}</span>{tracePath === id && <span style={{ marginLeft: "auto", color: "var(--accent)" }}>{window.Icons.check({ size: 17, sw: 2.4 })}</span>}</div>
-                <div style={{ fontSize: 13.5, fontWeight: 700 }}>{t}</div><div className="faint" style={{ fontSize: 12, marginTop: 2 }}>{d}</div>
-              </button>)}
+          <details style={{ padding: "10px 14px", borderRadius: "var(--r-md)", background: "var(--surface-2)", border: "1px solid var(--border)" }}>
+            <summary className="row gap-2" style={{ fontSize: 12.5, fontWeight: 600, cursor: "pointer", listStyle: "none" }}>
+              {window.Icons.info({ size: 14, style: { color: "var(--accent-text)" } })}<span>What's a trace?</span><span className="faint" style={{ fontSize: 11.5, fontWeight: 400, marginLeft: "auto" }}>expand</span>
+            </summary>
+            <div className="col gap-2" style={{ marginTop: 10 }}>
+              <p className="muted" style={{ fontSize: 12.5, lineHeight: 1.55 }}>A trace records what your agent did on one input — the output it produced, any tools it called, the context it retrieved, and latency. I generate these by calling your agent's API.</p>
+              <pre className="mono" style={{ padding: "11px 13px", borderRadius: 6, background: "var(--bg-inset)", border: "1px solid var(--border)", fontSize: 11.5, lineHeight: 1.6, overflowX: "auto", margin: 0, color: "var(--text)" }}>{`{
+  "input":   "Where is my order #1042?",
+  "output":  "Your order shipped May 24 …",
+  "tools":   [{ "name": "order_lookup", "args": { "id": "1042" } }],
+  "context": ["help/shipping#tracking"],
+  "latency_ms": 870
+}`}</pre>
+            </div>
+          </details>
+
+          {/* tab selector */}
+          <div className="col gap-2">
+            <span style={{ fontSize: 13, fontWeight: 600 }}>What do you have?</span>
+            <div className="row gap-3">
+              {[["labeled", "dataset", "Labeled goldens", "Inputs + ideal outputs (or scores)", "Recommended"],
+                ["unlabeled", "doc", "Unlabeled goldens", "Inputs only — we'll auto-label the traces", null],
+                ["traces", "trace", "Production traces only", "We'll curate a starter dataset for you", null]].map(([id, ic, t, d, badge]) =>
+                <button key={id} onClick={() => setTracePath(id)} style={{ flex: 1, textAlign: "left", padding: 13, borderRadius: "var(--r-lg)", border: `1.5px solid ${tracePath === id ? "var(--accent)" : "var(--border)"}`, background: tracePath === id ? "var(--accent-soft)" : "var(--surface)", transition: "all .13s" }}>
+                  <div className="row gap-2" style={{ marginBottom: 6 }}>
+                    <span style={{ width: 28, height: 28, borderRadius: 7, background: tracePath === id ? "var(--accent)" : "var(--surface-3)", color: tracePath === id ? "white" : "var(--text-2)", display: "flex", alignItems: "center", justifyContent: "center" }}>{window.Icons[ic]({ size: 15 })}</span>
+                    {badge && <span style={{ fontSize: 10, fontWeight: 700, padding: "2px 7px", borderRadius: 5, background: "var(--accent-soft)", color: "var(--accent-text)", textTransform: "uppercase", letterSpacing: "0.04em" }}>{badge}</span>}
+                    {tracePath === id && <span style={{ marginLeft: "auto", color: "var(--accent)" }}>{window.Icons.check({ size: 16, sw: 2.4 })}</span>}
+                  </div>
+                  <div style={{ fontSize: 13, fontWeight: 700 }}>{t}</div>
+                  <div className="faint" style={{ fontSize: 12, marginTop: 2 }}>{d}</div>
+                </button>)}
+            </div>
           </div>
 
-          {/* path A: upload */}
+          {/* path A & B: dataset upload + agent endpoint */}
+          {(tracePath === "labeled" || tracePath === "unlabeled") && <div className="col gap-3 view-enter">
+            {dsUp === "done"
+              ? <div className="row gap-2" style={{ padding: "13px 15px", borderRadius: "var(--r-md)", background: "var(--pos-soft)", border: "1px solid transparent" }}>{window.Icons.check({ size: 18, style: { color: "var(--pos)" } })}<div className="grow"><div style={{ fontSize: 13, fontWeight: 600, color: "var(--text)" }}>{tracePath === "labeled" ? "support_qa_labeled.csv — 120 examples loaded" : "support_qa_inputs.csv — 120 inputs loaded"}</div><div className="faint" style={{ fontSize: 11.5, marginTop: 1 }}>columns detected: {tracePath === "labeled" ? "input · ideal_output · score (1–5)" : "input"}</div></div></div>
+              : <button onClick={() => setDsUp("parsing")} disabled={dsUp === "parsing"} style={{ padding: "26px 20px", borderRadius: "var(--r-lg)", border: "1.5px dashed var(--border-strong)", background: "var(--surface)", display: "flex", flexDirection: "column", alignItems: "center", gap: 8, transition: "all .13s" }}
+                  onMouseEnter={(e) => { if (dsUp === "idle") { e.currentTarget.style.borderColor = "var(--accent)"; e.currentTarget.style.background = "var(--accent-soft)"; } }} onMouseLeave={(e) => { e.currentTarget.style.borderColor = "var(--border-strong)"; e.currentTarget.style.background = "var(--surface)"; }}>
+                  {dsUp === "parsing" ? <><Spinner size={20} /><span style={{ fontSize: 13, fontWeight: 600 }}>Reading dataset…</span></> : <>{window.Icons.dataset({ size: 22, style: { color: "var(--text-3)" } })}<span style={{ fontSize: 13.5, fontWeight: 600 }}>Drop <span className="mono">{tracePath === "labeled" ? "labeled.csv" : "inputs.csv"}</span> / <span className="mono">.jsonl</span> here, or browse</span><span className="faint" style={{ fontSize: 12, textAlign: "center" }}>{tracePath === "labeled" ? "input + ideal_output + (optional) per-criterion scores" : "just the inputs — we'll auto-label the resulting traces with a judge model"}</span></>}
+                </button>}
+
+            <div className="col gap-2">
+              <span style={{ fontSize: 13, fontWeight: 600 }}>Agent endpoint</span>
+              <Input value={endpoint} onChange={(e) => setEndpoint(e.target.value)} disabled={useMockEndpoint} placeholder="https://api.your-agent.com/v1/chat" />
+              <label className="row gap-2 faint" style={{ fontSize: 12, cursor: "pointer" }}>
+                <input type="checkbox" checked={useMockEndpoint} onChange={(e) => setUseMockEndpoint(e.target.checked)} style={{ cursor: "pointer" }} />
+                <span>Use mock endpoint (Support Copilot v1.2) — handy for trying the platform out</span>
+              </label>
+            </div>
+
+            {tracePath === "unlabeled" && <div className="row gap-2" style={{ padding: "10px 12px", borderRadius: "var(--r-md)", background: "var(--surface-2)", border: "1px solid var(--border)", fontSize: 12.5 }}>
+              {window.Icons.info({ size: 15, style: { color: "var(--accent-text)", flexShrink: 0, marginTop: 1 } })}<span className="muted">After capturing traces, I'll <b>auto-label each one with a strong judge model</b>. You'll review the labels before they harden into your golden set — or hand them off to your team for human review.</span>
+            </div>}
+          </div>}
+
+          {/* path C: production traces only */}
           {tracePath === "traces" && <div className="col gap-3 view-enter">
+            <div className="row gap-2" style={{ padding: "10px 12px", borderRadius: "var(--r-md)", background: "var(--surface-2)", border: "1px solid var(--border)", fontSize: 12.5 }}>
+              {window.Icons.info({ size: 15, style: { color: "var(--accent-text)", flexShrink: 0, marginTop: 1 } })}<span className="muted">No labeled dataset yet — that's fine. I'll <b>cluster your traces, pick a representative ~100-case subset</b>, and you'll confirm the selection covers your real workload. I then label that subset with a strong judge model (or your team) — that becomes your starter golden set.</span>
+            </div>
             {upload === "done"
-              ? <div className="row gap-2" style={{ padding: "13px 15px", borderRadius: "var(--r-md)", background: "var(--pos-soft)", border: "1px solid transparent" }}>{window.Icons.check({ size: 18, style: { color: "var(--pos)" } })}<div className="grow"><div style={{ fontSize: 13, fontWeight: 600, color: "var(--text)" }}>traces.zip — 512 traces parsed</div><div className="faint" style={{ fontSize: 11.5, marginTop: 1 }}>schema detected: input · output · context · tools · metadata</div></div></div>
+              ? <div className="row gap-2" style={{ padding: "13px 15px", borderRadius: "var(--r-md)", background: "var(--pos-soft)", border: "1px solid transparent" }}>{window.Icons.check({ size: 18, style: { color: "var(--pos)" } })}<div className="grow"><div style={{ fontSize: 13, fontWeight: 600, color: "var(--text)" }}>traces.zip — 512 traces parsed</div><div className="faint" style={{ fontSize: 11.5, marginTop: 1 }}>schema detected: input · output · context · tools · latency_ms</div></div></div>
               : <button onClick={() => setUpload("parsing")} disabled={upload === "parsing"} style={{ padding: "26px 20px", borderRadius: "var(--r-lg)", border: "1.5px dashed var(--border-strong)", background: "var(--surface)", display: "flex", flexDirection: "column", alignItems: "center", gap: 8, transition: "all .13s" }}
                   onMouseEnter={(e) => { if (upload === "idle") { e.currentTarget.style.borderColor = "var(--accent)"; e.currentTarget.style.background = "var(--accent-soft)"; } }} onMouseLeave={(e) => { e.currentTarget.style.borderColor = "var(--border-strong)"; e.currentTarget.style.background = "var(--surface)"; }}>
                   {upload === "parsing" ? <><Spinner size={20} /><span style={{ fontSize: 13, fontWeight: 600 }}>Parsing traces.zip…</span></> : <>{window.Icons.download({ size: 22, style: { color: "var(--text-3)" } })}<span style={{ fontSize: 13.5, fontWeight: 600 }}>Drop <span className="mono">traces.zip</span> here, or browse</span><span className="faint" style={{ fontSize: 12 }}>JSONL / zip exported from your logs · max 50 MB</span></>}
                 </button>}
-            <div className="row gap-2" style={{ fontSize: 12 }} ><span className="faint">or</span><button className="row gap-1" style={{ fontSize: 12, fontWeight: 600, color: "var(--accent-text)" }} onClick={() => setUpload("done")}>{window.Icons.bolt({ size: 13 })} live-connect the SDK & capture 512 now</button></div>
-          </div>}
-
-          {/* path B: describe + format */}
-          {tracePath === "describe" && <div className="col gap-3 view-enter">
-            <div className="row gap-2" style={{ padding: "10px 12px", borderRadius: "var(--r-md)", background: "var(--surface-2)", border: "1px solid var(--border)", fontSize: 12.5 }}>
-              {window.Icons.info({ size: 15, style: { color: "var(--accent-text)", flexShrink: 0, marginTop: 1 } })}<span className="muted">I'll <b>synthesize</b> a starter dataset and rubric from your description. Give me one example trace so I know the exact shape your agent emits — I'll match it.</span>
-            </div>
-            <div className="col gap-2">
-              <div className="row" style={{ justifyContent: "space-between" }}><span style={{ fontSize: 13, fontWeight: 600 }}>Trace format <span className="faint" style={{ fontWeight: 400 }}>· edit or paste a fake trace</span></span><span className="mono faint" style={{ fontSize: 11 }}>JSON</span></div>
-              <textarea value={format} onChange={(e) => setFormat(e.target.value)} rows={11} spellCheck={false} style={{ padding: "12px 14px", borderRadius: "var(--r-md)", border: "1px solid var(--border-strong)", background: "var(--bg-inset)", outline: "none", fontSize: 12, resize: "vertical", lineHeight: 1.6, fontFamily: "var(--font-mono)", color: "var(--text)", tabSize: 2 }}
-                onFocus={(e) => { e.target.style.borderColor = "var(--accent)"; e.target.style.boxShadow = "0 0 0 3px var(--accent-soft)"; }} onBlur={(e) => { e.target.style.borderColor = "var(--border-strong)"; e.target.style.boxShadow = "none"; }} />
-              <span className="row gap-1 faint" style={{ fontSize: 11.5 }}>{window.Icons.check({ size: 13, style: { color: "var(--pos)" } })} Looks valid — fields: input, output, context, tools, metadata.</span>
-            </div>
-          </div>}
-
-          {/* path C: bring your own labeled dataset + results */}
-          {tracePath === "labeled" && <div className="col gap-3 view-enter">
-            <div className="row gap-2" style={{ padding: "10px 12px", borderRadius: "var(--r-md)", background: "var(--surface-2)", border: "1px solid var(--border)", fontSize: 12.5 }}>
-              {window.Icons.info({ size: 15, style: { color: "var(--accent-text)", flexShrink: 0, marginTop: 1 } })}<span className="muted">Upload chat examples you've already <b>scored by hand</b> (input, agent output, your label). I'll infer the rubric from what separates your good vs. bad scores, and turn them into your golden set.</span>
-            </div>
-            {labeledUp === "done"
-              ? <div className="row gap-2" style={{ padding: "13px 15px", borderRadius: "var(--r-md)", background: "var(--pos-soft)", border: "1px solid transparent" }}>{window.Icons.check({ size: 18, style: { color: "var(--pos)" } })}<div className="grow"><div style={{ fontSize: 13, fontWeight: 600, color: "var(--text)" }}>chat_labeled.csv — 120 labeled examples</div><div className="faint" style={{ fontSize: 11.5, marginTop: 1 }}>columns detected: input · output · score (1–5) · note</div></div></div>
-              : <button onClick={() => setLabeledUp("parsing")} disabled={labeledUp === "parsing"} style={{ padding: "26px 20px", borderRadius: "var(--r-lg)", border: "1.5px dashed var(--border-strong)", background: "var(--surface)", display: "flex", flexDirection: "column", alignItems: "center", gap: 8, transition: "all .13s" }}
-                  onMouseEnter={(e) => { if (labeledUp === "idle") { e.currentTarget.style.borderColor = "var(--accent)"; e.currentTarget.style.background = "var(--accent-soft)"; } }} onMouseLeave={(e) => { e.currentTarget.style.borderColor = "var(--border-strong)"; e.currentTarget.style.background = "var(--surface)"; }}>
-                  {labeledUp === "parsing" ? <><Spinner size={20} /><span style={{ fontSize: 13, fontWeight: 600 }}>Reading labels & scores…</span></> : <>{window.Icons.doc({ size: 22, style: { color: "var(--text-3)" } })}<span style={{ fontSize: 13.5, fontWeight: 600 }}>Drop <span className="mono">labeled.csv</span> / <span className="mono">.jsonl</span> here, or browse</span><span className="faint" style={{ fontSize: 12 }}>inputs + outputs + your scores · the more the sharper the rubric</span></>}
-                </button>}
-            {labeledUp === "done" && <div className="row gap-2" style={{ fontSize: 11.5 }} ><span className="faint">Next, I'll</span><span className="row gap-1" style={{ fontWeight: 600, color: "var(--accent-text)" }}>{window.Icons.bolt({ size: 13 })} infer a rubric → build your golden set → run today's eval</span></div>}
           </div>}
         </div>}
 
@@ -152,13 +168,13 @@ function OnboardingFlow({ onComplete, theme, toggleTheme }) {
         {step === 2 && <div className="col gap-5 view-enter">
           <div><div className="row gap-2" style={{ marginBottom: 8 }}><AgentAvatar id="copilot" size={24} /><span className="faint" style={{ fontSize: 12.5 }}>Eval Copilot</span></div>
             <h1 style={{ fontSize: 24, fontWeight: 800, letterSpacing: "-0.03em" }}>Ready to build your first eval</h1>
-            <p className="muted" style={{ fontSize: 13.5, marginTop: 6 }}>{tracePath === "labeled" ? "You brought labeled examples — I'll infer the rubric from your scores, build the golden set, run today's eval, and keep comparing every day against it." : tracePath === "describe" ? "No traces yet — I'll synthesize a starter eval from your description and trace format, then refine with real traffic later." : "I'll run this end-to-end on your 512 traces — pausing for your approval at every step that defines correctness."}</p></div>
+            <p className="muted" style={{ fontSize: 13.5, marginTop: 6 }}>{tracePath === "labeled" ? "You brought labeled goldens — I'll run your agent on every input, score each trace against the rubric calibrated to your labels, and surface the gaps." : tracePath === "unlabeled" ? "You brought goldens without labels — I'll run your agent, auto-label each trace with a strong judge model (yours to review), then score against the rubric." : "You brought production traces — I'll cluster them, curate a starter golden set you can review, label that set with a judge model, then score against the rubric."}</p></div>
           <div className="col gap-2" style={{ padding: "8px 4px" }}>
             {(tracePath === "labeled"
-              ? [["ruler", "Infer a rubric from your labeled scores"], ["dataset", "Build a golden dataset from your labeled examples"], ["flask", "Run today's eval, scored per rubric dimension"], ["trace", "Open the continuous monitor — compare every day"]]
-              : tracePath === "describe"
-              ? [["dataset", "Synthesize a starter dataset from your description + format"], ["ruler", "Auto-generate a rubric set from your description"], ["dataset", "Create the evaluation dataset"], ["flask", "Run baseline evaluation"], ["dashboard", "Review report & recommendations"]]
-              : [["trace", "Analyze traces & extract behaviors"], ["ruler", "Auto-generate a rubric set from the logs"], ["dataset", "Create the evaluation dataset"], ["flask", "Run baseline evaluation"], ["dashboard", "Review report & recommendations"]]
+              ? [["trace", "Run your agent on every input — capture traces"], ["ruler", "Calibrate the rubric against your labels"], ["flask", "Score each trace and produce a baseline"], ["dashboard", "Review report & recommendations"]]
+              : tracePath === "unlabeled"
+              ? [["trace", "Run your agent on every input — capture traces"], ["ruler", "Derive a rubric set from the resulting traces"], ["check", "Auto-label each trace with a judge model"], ["flask", "Score against the rubric and produce a baseline"], ["dashboard", "Review report & recommendations"]]
+              : [["trace", "Analyze traces & extract behaviors"], ["dataset", "Curate a representative subset — your starter golden set"], ["ruler", "Derive a rubric set from the traces"], ["flask", "Score against the rubric and produce a baseline"], ["dashboard", "Review report & recommendations"]]
             ).map(([ic, l], i) => <div key={i} className="row gap-3" style={{ padding: "9px 11px", border: "1px solid var(--border)", borderRadius: "var(--r-md)", background: "var(--surface)" }}>
               <span style={{ width: 28, height: 28, borderRadius: 7, background: "var(--accent-soft)", color: "var(--accent-text)", display: "flex", alignItems: "center", justifyContent: "center", flexShrink: 0 }}>{window.Icons[ic]({ size: 15 })}</span>
               <span style={{ fontSize: 13, fontWeight: 500 }}>{l}</span>
@@ -173,11 +189,8 @@ function OnboardingFlow({ onComplete, theme, toggleTheme }) {
         {/* nav */}
         <div className="row gap-2" style={{ justifyContent: "space-between", marginTop: 4 }}>
           {step > 0 ? <Btn variant="ghost" icon="chevLeft" onClick={back}>Back</Btn> : <span />}
-          {step < 2 && <div className="row gap-2">
-            {step === 1 && <Btn variant="ghost" onClick={() => { setTracePath("describe"); next(); }}>Skip</Btn>}
-            <Btn variant="primary" iconR="arrowRight" disabled={!canContinue} onClick={next}>Continue</Btn>
-          </div>}
-          {step === 2 && <Btn variant="primary" size="lg" icon="bolt" onClick={() => onComplete(tracePath || "describe")}>Build my first eval</Btn>}
+          {step < 2 && <Btn variant="primary" iconR="arrowRight" disabled={!canContinue} onClick={next}>Continue</Btn>}
+          {step === 2 && <Btn variant="primary" size="lg" icon="bolt" onClick={() => onComplete(tracePath || "traces")}>Build my first eval</Btn>}
         </div>
       </div>
     </div>
