@@ -2,9 +2,9 @@
 const { useState: useObS, useEffect: useObE } = React;
 
 const AGENT_TYPES = [
-  { id: "support", name: "Support agent", desc: "RAG + tools over your help docs", icon: "review", placeholder: "A customer-support copilot for our SaaS. It answers questions about orders, refunds and shipment tracking by retrieving from our help center, and can call order_lookup and issue_refund tools." },
-  { id: "rag", name: "RAG Q&A", desc: "Retrieval-augmented question answering", icon: "dataset", placeholder: "A documentation Q&A bot. Given a question, it retrieves passages from our docs and answers with citations." },
-  { id: "code", name: "Code agent", desc: "Multi-step plan → edit → test", icon: "doc", placeholder: "A coding agent that takes a GitHub issue, plans a fix, edits files, and runs the test suite until it passes." },
+  { id: "support", name: "Conversational assistant", desc: "Chatbots, support copilots, internal helpdesks", icon: "review", placeholder: "A customer-support copilot for our SaaS. It answers questions about orders, refunds and shipment tracking by retrieving from our help center, and can call order_lookup and issue_refund tools." },
+  { id: "rag", name: "Knowledge Q&A", desc: "RAG over docs or a knowledge base, with citations", icon: "dataset", placeholder: "A documentation Q&A bot. Given a question, it retrieves passages from our docs and answers with citations." },
+  { id: "code", name: "Coding agent", desc: "IDE assistants, PR-fix bots, codegen", icon: "doc", placeholder: "A coding agent that takes a GitHub issue, plans a fix, edits files, and runs the test suite until it passes." },
   { id: "other", name: "Something else", desc: "Describe it in your own words", icon: "bolt", placeholder: "Describe its purpose, target users, typical inputs, the tools or knowledge sources it can call, and what distinguishes a strong response from a weak one." },
 ];
 
