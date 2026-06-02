@@ -99,18 +99,18 @@ function ConversationPane({ openCanvas, canvas, push, autostart, autostartPath }
     : describeMode ? ["dataset", "rubric", "baseline", "report"]
     : ["cluster", "rubric", "dataset", "baseline", "report"];
   const planLabels = labeledMode
-    ? ["Infer a rubric from your labeled scores", "Build the golden dataset from your labels", "Run today's eval, scored per rubric", "Open the continuous monitor"]
+    ? ["Calibrate a rubric against your labels", "Confirm your golden dataset", "Call your agent and score each trace", "Open the continuous monitor"]
     : describeMode
     ? ["Synthesize a starter dataset from your description", "Discover a rubric", "Run a baseline", "Summarize & recommend"]
     : ["Analyze traces & extract behaviors", "Auto-generate a rubric set from the logs", "Create the evaluation dataset", "Run baseline evaluation", "Review report & recommendations"];
   const STEP_META = {
     cluster: { agent: "triage", label: "Triage Agent analyzing all 512 traces & extracting behaviors…" },
-    dataset: { agent: "dataset", label: labeledMode ? "Dataset Agent building your golden set…" : describeMode ? "Dataset Agent synthesizing starter cases…" : "Dataset Agent building the golden dataset…" },
-    rubric: { agent: "rubric", label: labeledMode ? "Rubric Agent inferring criteria from your labels…" : "Rubric Agent reading your logs…" },
+    dataset: { agent: "dataset", label: labeledMode ? "Confirming your golden dataset…" : describeMode ? "Dataset Agent synthesizing starter cases…" : "Dataset Agent building the golden dataset…" },
+    rubric: { agent: "rubric", label: labeledMode ? "Calibrating the rubric against your labels…" : "Rubric Agent reading your logs…" },
     calibrate: { agent: "rubric", label: "Calibrating judge vs human golden…" },
     baseline: { agent: "copilot", label: "Running baseline…" },
     report: { agent: "copilot", label: "Summarizing results…" },
-    daily: { agent: "copilot", label: "Running today's eval, scoring per rubric…" },
+    daily: { agent: "copilot", label: "Calling your agent on every input, scoring per rubric…" },
     monitor: { agent: "copilot", label: "Setting up the continuous monitor…" },
   };
   const nextOf = (id) => flow[flow.indexOf(id) + 1];
@@ -122,7 +122,7 @@ function ConversationPane({ openCanvas, canvas, push, autostart, autostartPath }
     if (!auto) setMsgs((m) => [...m, { kind: "user", node: <>Build me an eval for my support agent — it handles <b>order</b>, <b>refund</b>, and <b>tracking</b>.</> }]);
     setTimeout(() => setShown((s) => [...s, "plan"]), 450);
     const first = mode === "labeled" ? "rubric" : mode === "describe" ? "dataset" : "cluster";
-    const lbl = mode === "labeled" ? "Rubric Agent inferring criteria from your labels…" : mode === "describe" ? "Dataset Agent synthesizing starter cases from your description…" : "Triage Agent analyzing all 512 traces & extracting behaviors…";
+    const lbl = mode === "labeled" ? "Calibrating the rubric against your labels…" : mode === "describe" ? "Dataset Agent synthesizing starter cases from your description…" : "Triage Agent analyzing all 512 traces & extracting behaviors…";
     const ag = mode === "labeled" ? "rubric" : mode === "describe" ? "dataset" : "triage";
     setTimeout(() => reveal(first, ag, lbl, 1500), 1100);
   };
@@ -133,7 +133,7 @@ function ConversationPane({ openCanvas, canvas, push, autostart, autostartPath }
       const mode = autostartPath === "describe" ? "describe" : autostartPath === "labeled" ? "labeled" : "traces";
       setOrch(true); setBootstrap(mode);
       const greeting = mode === "labeled"
-        ? <>Thanks, Mei. You brought <b>120 chat examples you labeled by hand</b>, with your own scores. I'll <b>infer the rubric from those labels</b>, turn them into your golden set, run today's eval against it, and set up a daily monitor. I'll pause for your approval at each step.</>
+        ? <>Thanks, Mei. You uploaded a <b>golden dataset with 120 labeled examples</b> — inputs paired with ideal outputs and per-criterion scores. I'll <b>call your agent on every input</b> to capture traces, calibrate the rubric against your labels, then score each trace and surface the gaps. I'll pause for your approval at each step.</>
         : mode === "describe"
         ? <>Thanks, Mei. You don't have production traces yet, so I'll <b>synthesize a starter eval from your description</b> and the trace format you gave me — then we'll refine it with real traffic once it arrives. I'll pause for your approval at each step.</>
         : <>Thanks, Mei — I've received your first <b>512 traces</b> from Support Copilot. Let me build your first eval. I'll pause for your approval at each step.</>;
@@ -255,7 +255,7 @@ function ConversationPane({ openCanvas, canvas, push, autostart, autostartPath }
 
       {shown.includes("dataset") && <Proposal agent="dataset" autonomy="draft" title={labeledMode ? "Golden dataset — from your labels" : describeMode ? "Starter dataset — synthesized" : `Evaluation dataset — created`} sub={labeledMode ? "120 labeled examples" : `${goldenRecs.length - removed.length} records`} approved={approved.dataset} onOpen={() => openCanvas({ view: "datasets", id: "ds_golden" }, false)}
         evidence={labeledMode
-          ? <>Every example here is one <b>you scored by hand</b> — they become the golden set the judge calibrates against. No synthesis, no mining; this is your ground truth.</>
+          ? <>Every example here comes from <b>the golden dataset you uploaded</b> — input paired with your ideal output and per-criterion scores. The judge will calibrate to these labels; this is your ground truth.</>
           : describeMode
           ? <>No production traces yet, so every record is <b>synthetic</b>, generated from your description + the trace format you provided, and clearly tagged. Once real traffic arrives I'll mine and replace these with grounded cases.</>
           : <>Mined from the clusters + synthetic boundary cases. Synthesis used a different model family than the agent under test. Each record tagged with provenance.</>}
@@ -272,9 +272,9 @@ function ConversationPane({ openCanvas, canvas, push, autostart, autostartPath }
         <button onClick={() => openCanvas({ view: "datasets", id: "ds_golden" }, false)} className="faint row gap-1" style={{ fontSize: 11, marginTop: 7 }}>open full dataset in canvas{window.Icons.arrowRight({ size: 11 })}</button>
       </Proposal>}
 
-      {shown.includes("rubric") && <Proposal agent="rubric" autonomy="draft" title={labeledMode ? "Rubric — inferred from your labels" : "Rubric set — from your logs"} sub={labeledMode ? "from your scores" : "from all traffic"} approved={approved.rubric} onOpen={() => openCanvas({ view: "rubrics" }, false)}
+      {shown.includes("rubric") && <Proposal agent="rubric" autonomy="draft" title={labeledMode ? "Rubric — calibrated to your labels" : "Rubric set — from your logs"} sub={labeledMode ? "from your labels" : "from all traffic"} approved={approved.rubric} onOpen={() => openCanvas({ view: "rubrics" }, false)}
         evidence={labeledMode
-          ? <>Derived by finding what separates your <b>high-scored from low-scored</b> chat examples. These become the judge's scoring prompt — calibrated against the very labels you provided.</>
+          ? <>Derived from the criteria implicit in your <b>ideal outputs and per-criterion scores</b>. The judge uses this prompt to score every trace your agent generates — calibrated against the labels you provided.</>
           : <>Built from the <b>whole log distribution</b> — coverage of your top intents, helpfulness and tone — not just the failures. Becomes the judge's scoring prompt.</>}
         onEdit={() => { setExtraCrit(true); push("Added: Compliance phrasing", "pos"); }} approveLabel="Approve"
         onApprove={() => approve("rubric")}>
