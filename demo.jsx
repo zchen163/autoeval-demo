@@ -83,7 +83,7 @@
     playBtn.onclick = togglePause;
     host.querySelector(".aed-restart").onclick = () => startScene(state.scene);
     host.querySelector(".aed-exit").onclick = exitDemo;
-    const chaps = [[1, "A · Offline eval"], [2, "B · Iterate"], [8, "C · Online monitoring"]];
+    const chaps = [[1, "A · Offline eval"], [8, "B · Online monitoring"]];
     chaps.forEach(([n, label]) => { const b = document.createElement("button"); b.className = "aed-chap"; b.dataset.scene = n; b.textContent = label; b.onclick = () => startScene(n); chapWrap.appendChild(b); });
   }
   function markChapter() { [...chapWrap.children].forEach((c) => c.classList.toggle("on", +c.dataset.scene === state.scene)); }
@@ -143,28 +143,8 @@
   // ---------------- scripts ----------------
   function buildScript(scene) {
     if (scene === 1) return [...sceneT1(), ...sceneT2(), ...sceneT3()]; // A · Offline eval
-    if (scene === 2) return sceneIterate();                             // B · Iterate
-    if (scene === 8) return sceneReview();                              // C · Online monitoring
+    if (scene === 8) return sceneReview();                              // B · Online monitoring
     return [...sceneT1(), ...sceneT2(), ...sceneT3()];                  // default = Offline
-  }
-
-  // ---- iterate: take a fix from the report → re-run → compare → repeat ----
-  function sceneIterate() {
-    return [
-      { chapter: "Last eval", cap: "Open the v1.2 baseline report — overall 0.712.", run: () => askComposer("show me the first eval results report") },
-      { chapter: "Last eval", cap: "Three high-impact gaps. The refund flow is the worst — order-number confirmation fails 61% of refunds.", run: () => actSpot(T("Top gaps, ranked by impact", { contains: true }), 3500) },
-
-      { chapter: "Iterate", cap: "Take the suggested fix — tighten retrieval, enable reranking — and re-run as v1.3.", run: () => askComposer("run a new experiment with reranking enabled") },
-      { chapter: "Iterate", cap: "v1.3 scoring against the same rubric and same golden dataset — apples-to-apples.", run: () => sleep(2500) },
-
-      { chapter: "Compare", cap: "Compare v1.2 baseline against v1.3 with the fix.", run: () => askComposer("compare v1.2 and v1.3") },
-      { chapter: "Compare", cap: "Net +4pp overall. Faithfulness moved the most; two refund records regressed and were flagged for review.", run: () => actSpot(T("Metric breakdown", { contains: true }), 3500) },
-
-      { chapter: "Iterate again", cap: "Two more iterations later — v1.4 adds reflection to plug the residual gap.", run: () => askComposer("show me all experiments") },
-      { chapter: "Iterate again", cap: "v1.1 → v1.2 → v1.3 → v1.4 — same rubric, same dataset. Real progress, comparable every time.", run: () => actSpot(T("Experiments", { contains: false }), 2800) },
-
-      { chapter: "Done", cap: "The eval loop: read gaps → tweak the agent → re-run → compare. The rubric stays fixed; the agent improves.", run: () => sleep(3000) },
-    ];
   }
 
   // ---- returning customer: log in → review prod logs → rubric suggestions → flag for review ----
@@ -196,12 +176,14 @@
       { chapter: "Describe", cap: "Describe in plain English what this agent does.", run: () => actSpot(() => document.querySelector("textarea"), 2800) },
       { chapter: "Describe", cap: "Next.", run: () => actClick(T("Continue", { contains: true, tag: "button" })) },
       { chapter: "Dataset", cap: "A trace records what the agent did on one input — we generate one per input by calling your agent's API.", run: () => actSpot(T("What's a trace?", { contains: true }), 2800) },
-      { chapter: "Dataset", cap: "For this demo, start from production traces — we'll curate a dataset.", run: () => actClick(T("Production traces only", { contains: true, tag: "button" }), { after: 1100 }) },
+      { chapter: "Dataset", cap: "For this demo, start from production traces — we work from them directly.", run: () => actClick(T("Production traces only", { contains: true, tag: "button" }), { after: 1100 }) },
       { chapter: "Dataset", cap: "Upload traces.zip.", run: () => actClick(T("Drop", { contains: true, tag: "button" })) },
       { chapter: "Dataset", cap: "512 traces parsed; schema auto-detected.", run: () => actSpot(T("512 traces parsed", { contains: true }), 2600) },
       { chapter: "Dataset", cap: "Continue.", run: () => actClick(T("Continue", { contains: true, tag: "button" })) },
-      { chapter: "First eval", cap: "Next the agent will: analyze traces → generate rubric set → create dataset → baseline → report.", run: () => sleep(2800) },
-      { chapter: "First eval", cap: "Start building.", run: () => actClick(T("Build my first eval", { contains: true, tag: "button" })) },
+      { chapter: "First eval", cap: "The plan: analyze traces → derive rubric → score → report.", run: () => sleep(2800) },
+      { chapter: "First eval", cap: "Continue.", run: () => actClick(T("Continue", { contains: true, tag: "button" })) },
+      { chapter: "Optimization", cap: "Then iterate: gap → fix → re-run → compare. Same rubric, same dataset every time.", run: () => sleep(3000) },
+      { chapter: "Optimization", cap: "Start building.", run: () => actClick(T("Build my first eval", { contains: true, tag: "button" })) },
     ];
   }
   function sceneT2() {

@@ -20,13 +20,13 @@ function OnboardingFlow({ onComplete, theme, toggleTheme }) {
   const [useMockEndpoint, setUseMockEndpoint] = useObS(true);
   const [invites, setInvites] = useObS(["raj@northwind.ai"]);
   const [inviteDraft, setInviteDraft] = useObS("");
-  const labels = ["Describe", "Dataset", "First eval"];
+  const labels = ["Describe", "Dataset", "First eval", "Optimization"];
   const key = "ne_live_" + "a91c7f3b2d80" + "9f4e1b6d3057";
 
   useObE(() => { if (upload === "parsing") { const t = setTimeout(() => setUpload("done"), 2200); return () => clearTimeout(t); } }, [upload]);
   useObE(() => { if (dsUp === "parsing") { const t = setTimeout(() => setDsUp("done"), 2200); return () => clearTimeout(t); } }, [dsUp]);
 
-  const next = () => setStep((s) => Math.min(2, s + 1));
+  const next = () => setStep((s) => Math.min(3, s + 1));
   const back = () => setStep((s) => Math.max(0, s - 1));
   const pickType = (t) => { setType(t.id); if (desc === AGENT_TYPES.find((x) => x.id === type)?.placeholder || !desc) setDesc(t.placeholder); };
 
@@ -187,11 +187,33 @@ function OnboardingFlow({ onComplete, theme, toggleTheme }) {
           </div>
         </div>}
 
+        {/* STEP 3 — iterative optimization */}
+        {step === 3 && <div className="col gap-5 view-enter">
+          <div><div className="row gap-2" style={{ marginBottom: 8 }}><AgentAvatar id="copilot" size={24} /><span className="faint" style={{ fontSize: 12.5 }}>Eval Copilot</span></div>
+            <h1 style={{ fontSize: 24, fontWeight: 800, letterSpacing: "-0.03em" }}>Then iterate to improve</h1>
+            <p className="muted" style={{ fontSize: 13.5, marginTop: 6, lineHeight: 1.55 }}>The first eval is just the baseline. You'll iterate from here: take a suggested fix from the report, re-run against the <b>same rubric and same dataset</b>, and compare. Same ruler every iteration — real, comparable progress.</p></div>
+          <div className="col gap-2" style={{ padding: "8px 4px" }}>
+            {[["dashboard", "Read the report — gaps ranked by impact, each with a fix"],
+              ["ruler", "Apply a fix to your prompt, retrieval, or tools"],
+              ["flask", "Re-run as a new experiment — same rubric, same dataset"],
+              ["layers", "Compare to the previous run — what improved, what regressed"],
+              ["trace", "Repeat — every iteration tracked against the fixed ruler"]
+            ].map(([ic, l], i) => <div key={i} className="row gap-3" style={{ padding: "9px 11px", border: "1px solid var(--border)", borderRadius: "var(--r-md)", background: "var(--surface)" }}>
+              <span style={{ width: 28, height: 28, borderRadius: 7, background: "var(--accent-soft)", color: "var(--accent-text)", display: "flex", alignItems: "center", justifyContent: "center", flexShrink: 0 }}>{window.Icons[ic]({ size: 15 })}</span>
+              <span style={{ fontSize: 13, fontWeight: 500 }}>{l}</span>
+              <span className="mono faint" style={{ fontSize: 11, marginLeft: "auto" }}>{i + 1}</span>
+            </div>)}
+          </div>
+          <div className="row gap-2" style={{ padding: "10px 12px", borderRadius: "var(--r-md)", background: "var(--surface-2)", border: "1px solid var(--border)", fontSize: 12 }}>
+            {window.Icons.info({ size: 15, style: { color: "var(--accent-text)", flexShrink: 0 } })}<span className="muted">Because the rubric and dataset stay fixed across runs, every score is directly comparable — no apples-to-oranges drift between iterations.</span>
+          </div>
+        </div>}
+
         {/* nav */}
         <div className="row gap-2" style={{ justifyContent: "space-between", marginTop: 4 }}>
           {step > 0 ? <Btn variant="ghost" icon="chevLeft" onClick={back}>Back</Btn> : <span />}
-          {step < 2 && <Btn variant="primary" iconR="arrowRight" disabled={!canContinue} onClick={next}>Continue</Btn>}
-          {step === 2 && <Btn variant="primary" size="lg" icon="bolt" onClick={() => onComplete(tracePath || "traces")}>Build my first eval</Btn>}
+          {step < 3 && <Btn variant="primary" iconR="arrowRight" disabled={!canContinue} onClick={next}>Continue</Btn>}
+          {step === 3 && <Btn variant="primary" size="lg" icon="bolt" onClick={() => onComplete(tracePath || "traces")}>Build my first eval</Btn>}
         </div>
       </div>
     </div>
