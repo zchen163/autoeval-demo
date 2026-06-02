@@ -175,7 +175,7 @@
       { chapter: "Sign in", cap: "Sign in to AutoEval.", run: () => actClick(T("Sign in", { tag: "button" })) },
       { chapter: "Describe", cap: "Describe in plain English what this agent does.", run: () => actSpot(() => document.querySelector("textarea"), 2800) },
       { chapter: "Describe", cap: "Next.", run: () => actClick(T("Continue", { contains: true, tag: "button" })) },
-      { chapter: "Dataset", cap: "A trace is the agent's actual behavior on one input.", run: () => actClick(T("What's a trace?", { contains: true }), { optional: true, after: 1500 }) },
+      { chapter: "Dataset", cap: "A trace records what the agent did on one input — we generate one per input by calling your agent's API.", run: () => actSpot(T("What's a trace?", { contains: true }), 2800) },
       { chapter: "Dataset", cap: "For this demo, start from production traces — we'll curate a dataset.", run: () => actClick(T("Production traces only", { contains: true, tag: "button" }), { after: 1100 }) },
       { chapter: "Dataset", cap: "Upload traces.zip.", run: () => actClick(T("Drop", { contains: true, tag: "button" })) },
       { chapter: "Dataset", cap: "512 traces parsed; schema auto-detected.", run: () => actSpot(T("512 traces parsed", { contains: true }), 2600) },

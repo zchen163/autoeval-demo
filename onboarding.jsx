@@ -92,21 +92,22 @@ function OnboardingFlow({ onComplete, theme, toggleTheme }) {
             <h1 style={{ fontSize: 24, fontWeight: 800, letterSpacing: "-0.03em" }}>Connect a golden dataset</h1>
             <p className="muted" style={{ fontSize: 13.5, marginTop: 6, lineHeight: 1.55 }}>A <b>golden dataset</b> is the set of inputs (and, ideally, <b>labels</b> — your ideal outputs or per-criterion scores) we'll evaluate your agent against. I'll call your agent on every input to capture <b>traces</b>, then score each trace against the rubric — that's how we find the gaps and target improvements.</p></div>
 
-          <details style={{ padding: "10px 14px", borderRadius: "var(--r-md)", background: "var(--surface-2)", border: "1px solid var(--border)" }}>
-            <summary className="row gap-2" style={{ fontSize: 12.5, fontWeight: 600, cursor: "pointer", listStyle: "none" }}>
-              {window.Icons.info({ size: 14, style: { color: "var(--accent-text)" } })}<span>What's a trace?</span><span className="faint" style={{ fontSize: 11.5, fontWeight: 400, marginLeft: "auto" }}>expand</span>
-            </summary>
-            <div className="col gap-2" style={{ marginTop: 10 }}>
-              <p className="muted" style={{ fontSize: 12.5, lineHeight: 1.55 }}>A trace records what your agent did on one input — the output it produced, any tools it called, the context it retrieved, and latency. I generate these by calling your agent's API.</p>
-              <pre className="mono" style={{ padding: "11px 13px", borderRadius: 6, background: "var(--bg-inset)", border: "1px solid var(--border)", fontSize: 11.5, lineHeight: 1.6, overflowX: "auto", margin: 0, color: "var(--text)" }}>{`{
-  "input":   "Where is my order #1042?",
-  "output":  "Your order shipped May 24 …",
-  "tools":   [{ "name": "order_lookup", "args": { "id": "1042" } }],
-  "context": ["help/shipping#tracking"],
-  "latency_ms": 870
-}`}</pre>
+          <div style={{ padding: "14px 16px", borderRadius: "var(--r-md)", background: "var(--surface-2)", border: "1px solid var(--border)" }}>
+            <div className="row gap-2" style={{ marginBottom: 8, alignItems: "center" }}>
+              {window.Icons.trace({ size: 16, style: { color: "var(--accent-text)" } })}
+              <span style={{ fontSize: 13, fontWeight: 700 }}>What's a trace?</span>
+              <span style={{ marginLeft: "auto", fontSize: 10, fontWeight: 700, padding: "2px 7px", borderRadius: 5, background: "var(--accent-soft)", color: "var(--accent-text)", textTransform: "uppercase", letterSpacing: "0.04em" }}>We generate this</span>
             </div>
-          </details>
+            <p className="muted" style={{ fontSize: 12.5, lineHeight: 1.55, marginBottom: 10 }}>A trace records what your agent did on one input — the output, the tools it called, the context it retrieved, and how long it took. I'll <b>generate one for every input</b> in your dataset by calling your agent's API.</p>
+            <pre className="mono" style={{ padding: "12px 14px", borderRadius: 6, background: "var(--bg-inset)", border: "1px solid var(--border)", fontSize: 11.5, lineHeight: 1.7, overflowX: "auto", margin: 0, color: "var(--text)" }}>{`{
+  "input":   "Where is my order #1042?",      // the user's question
+  "output":  "Your order shipped May 24 …",   // what your agent answered
+  "tools":   [{ "name": "order_lookup",       // tools your agent called
+                "args": { "id": "1042" } }],
+  "context": ["help/shipping#tracking"],      // what it retrieved
+  "latency_ms": 870                            // how fast
+}`}</pre>
+          </div>
 
           {/* tab selector */}
           <div className="col gap-2">
